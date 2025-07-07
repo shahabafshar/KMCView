@@ -1,0 +1,312 @@
++---------------------------------------------------+
+|  ZACROS 4.0                                       |
+|  GRAPH-THEORETICAL KMC SIMULATION CODE            |
+|                                                   |
+|  Multiscale Computational Catalysis and           |
+|  Materials Science Research Group                 |
+|                                                   |
+|  Michail Stamatakis, Ph.D.                        |
+|  Department of Chemistry                          |
+|  University of Oxford                             |
++---------------------------------------------------+
+
+Compiler information:
+~~~~~~~~~~~~~~~~~~~~~~
+ /opt/ompi/bin/mpifort
+ Intel(R) Fortran Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 18.0.3.222 Build 20180410
+ -I/opt/ompi/include -I/opt/ompi/lib -DCOMPILER_SUPPORTS_COMPILER2008 -DUSING_CMAKE -DWITH_MPI_ -diag-disable=5462,6536 -fopenmp -c -o CMakeFiles/zacros_lib.dir/info_module_processed.F90.o
+ Zacros 4.0
+ Configured at git: NA
+
+Threading/multiprocessing information:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Distributed run with 1 MPI process, each with 16 OpenMP threads.
+    The rank of this MPI process is 0.
+    The name of this processor is "eu10".
+
+Simulation setup:
+~~~~~~~~~~~~~~~~~
+
+    Random sequence with seed: 71543
+
+    Temperature: 573.000000000000
+
+    Pressure: 0.100000000000000
+
+    Number of gas species: 4
+
+
+    Gas species names: H H2 GeH2 GeH3 
+
+
+    Gas species energies: 0.000000000000000E+000 0.000000000000000E+000 0.000000000000000E+000 -0.320000000000000 
+
+
+    Gas species molecular weights: 1.04000000000000 2.01600000000000 73.6400000000000 74.6400000000000 
+
+
+    Gas species molar fractions: 0.000000000000000E+000 0.000000000000000E+000 0.000000000000000E+000 1.00000000000000 
+
+    Number of surface species: 3
+
+
+    Surface species names: H* GeH2* GeH3* 
+
+
+    Surface species dentation:  1  1  1
+
+    Snapshots will be reported in file history_output.txt every 1.00000000000000 time units
+
+    Process statistics will be reported in file procstat_output.txt every 1.00000000000000 time units
+
+    Species numbers will be reported in file specnum_output.txt every 1.00000000000000 time units
+
+    Maximum number of steps: 9223372036854775807 (maximum allowed value)
+
+    Max simulated time: 500.000000000000                
+
+    Allowed walltime in seconds: 30
+
+    The default Mersenne Twister 19937 random number generator will be used for this simulation.
+
+    Initializing the random number generator took 0.745310000000000 seconds
+
+    The default first reaction method will be used for propagating the KMC state, with a binary heap for the event-queue
+
+    The default legacy-Zacros module will be used as a subgraph isomorphism solver for elementary events
+
+    The default legacy-Zacros module will be used as a subgraph isomorphism solver for energetic clusters
+
+    [Memory Management] Dynamic array sizes will be used during the simulation as per the default behavior, unless this is incompatible with the KMC state queue container (if so, a warning will appear).
+
+    [MPI Time-Warp] By default, KMC snapshot-taking will be disabled as this is a single MPI process run (you can override this default behavior with keyword "force_state_snapshots_1mpipr").
+
+    [MPI Time-Warp] Default container for storing variable size KMC state snapshots to be used in rollbacks: var_element_linked_list.
+
+    [MPI Time-Warp] Default max-size of KMC state queue container (in Gb): 0.5000000
+
+    [MPI Time-Warp] Default snapshot interval: 50
+
+    [MPI Time-Warp] Automatically chosen time interval for global virtual time computation, in seconds: 5
+
+Finished reading simulation input.
+
+Lattice setup:
+~~~~~~~~~~~~~~
+
+    Parsing unit cell data for a periodic lattice.
+
+    Unit cell area: 37.6232570884000
+
+    Unit cell tiling: 20 x 20
+
+    Lattice surface area: 15049.3028353600
+
+    Number of lattice sites per cell: 4
+
+    Total number of lattice sites: 1600
+
+    Number of site types: 4
+
+    Site type names and total number of sites of that type:
+      top1 (400)
+      bridge1 (400)
+      top2 (400)
+      bridge2 (400)
+
+    Maximum coordination number: 9
+
+Finished reading lattice input.
+
+Energetics setup:
+~~~~~~~~~~~~~~~~~
+
+    Number of clusters: 7
+
+    Maximum number of sites involved in a cluster: 2
+
+    Clusters:
+
+        1. H_Point_top1:  Mult = 1      ECI = -0.680000000000000        Entities:  H* 
+        2. H_Point_top2:  Mult = 1      ECI = -0.680000000000000        Entities:  H* 
+        3. H_Pair_top:    Mult = 2      ECI = -0.180000000000000        Entities:  H* H*
+        4. GeH3_top1:     Mult = 1      ECI = -2.74000000000000         Entities:  GeH3* 
+        5. GeH3_top2:     Mult = 1      ECI = -1.90000000000000         Entities:  GeH3* 
+        6. GeH2_bridge1:  Mult = 1      ECI = -2.55000000000000         Entities:  GeH2* 
+        7. GeH2_bridge2:  Mult = 1      ECI = -1.94000000000000         Entities:  GeH2* 
+
+Finished reading energetics input.
+
+Mechanism setup:
+~~~~~~~~~~~~~~~~
+
+    Number of elementary steps: 8
+
+    Maximum number of sites involved in a step: 2
+
+    Reaction network:
+
+        1. GeH3_adsorption_clean_fwd:    A(Tini) =  2.0000E-02    Ea       =  0.00    k(Tini) =  2.0000E-02    Reaction: GeH3  +  *(top1)  ->  GeH3*(top1)
+        2. GeH3_adsorption_clean_rev:    A(Tini) =  9.5238E+06  [ Ea-ideal =  2.42    k(Tini) =  4.9420E-15 ]  Reaction: GeH3*(top1)  ->  GeH3  +  *(top1)
+        3. GeH3_to_GeH2_clean_fwd:       A(Tini) =  1.6100E+13    Ea       =  1.89    k(Tini) =  3.8326E-04    Reaction: GeH3*(top1)  +  *(bridge1)  ->  H*(top1)  +  GeH2*(bridge1)
+        4. GeH3_to_GeH2_clean_rev:       A(Tini) =  1.6100E+13  [ Ea-ideal =  2.38    k(Tini) =  1.8782E-08 ]  Reaction: H*(top1)  +  GeH2*(bridge1)  ->  GeH3*(top1)  +  *(bridge1)
+        5. GeH3_adsorption_fwd:          A(Tini) =  2.0000E-02    Ea       =  0.00    k(Tini) =  2.0000E-02    Reaction: GeH3  +  *(top2)  ->  GeH3*(top2)
+        6. GeH3_adsorption_rev:          A(Tini) =  9.5238E+06  [ Ea-ideal =  1.58    k(Tini) =  1.2080E-07 ]  Reaction: GeH3*(top2)  ->  GeH3  +  *(top2)
+        7. GeH3_to_GeH2_fwd:             A(Tini) =  1.6100E+13    Ea       =  1.60    k(Tini) =  1.3620E-01    Reaction: GeH3*(top2)  +  *(bridge2)  ->  H*(top2)  +  GeH2*(bridge2)
+        8. GeH3_to_GeH2_rev:             A(Tini) =  1.6100E+13  [ Ea-ideal =  2.32    k(Tini) =  6.3309E-08 ]  Reaction: H*(top2)  +  GeH2*(bridge2)  ->  GeH3*(top2)  +  *(bridge2)
+
+    This mechanism contains up to two-site events involving only monodentate species (all of which have no geometric specifications).
+
+Finished reading mechanism input.
+
+Preparing simulation:
+~~~~~~~~~~~~~~~~~~~~~
+
+    Constructing requested lattice structure.
+
+        Parallel run, but with a single MPI process.
+
+        Global values: ncells = 400, nsites = 1600, nsites/cell = 4
+
+        Local values: ncells = 400, nsites = 1600
+
+        Sublattice edges: (1,1) (20,20)
+
+        The following are reported in multiples of the unit cell vectors a and b:
+
+            Domain+Halo:     (20,20)
+            Halo:            (0,0)
+            Internal Domain: (20,20)
+
+        Lattice structure written to lattice_output.txt
+
+
+    Pre-allocating KMC-simulation-handling datastructures... done!
+
+
+    Pre-allocating lattice-handling datastructures... done!
+
+
+    Pre-allocating event-rate-handling datastructures... done!
+
+    Initializing lattice state.
+
+        All lattice sites are vacant.
+
+    Initializing energetics.
+
+        Total adlayer energy: 0.000000000000000E+000
+
+    Initializing lattice events.
+
+
+        800 lattice events found and stored in binary heap.
+
+    Initializing Time-Warp engine.
+
+        KMC state snapshot queue: element size = 560512 bytes, queue max length = 957
+
+        Interval for snapshot taking: 50 steps.
+
+        Setting up message queue.
+
+Commencing simulation:
+~~~~~~~~~~~~~~~~~~~~~~
+
+   ===============================================================================
+   Performing collective communications for global virtual time (GVT) computation
+   ===============================================================================
+
+
+   ===============================================================================
+   Performing collective communications for global termination status
+   ===============================================================================
+
+   This MPI-process has finished locally...
+
+   All MPI-processes have finished...
+
+   All messages sent by this MPI-process have been confirmed as received...
+
+   All messages sent by all MPI-processes have been confirmed as received...
+
+   Entered GVT-comp block at: 5.00000100000000
+   After MPI-reduction:       5.00004600000000
+     --------------------------------------------------------------------------
+     Different times involved in the Time-Warp algorithm
+     -----------------------------------------------------------------------------
+       Global virtual time                            :   502.533315767461
+       Global virtual time advancement                :   502.533315767461
+       Local time                                     :   502.533315767461
+       Minimum timestamp among sent messages          :   1.797693134862316E+308
+       Minimum timestamp among received messages      :   1.797693134862316E+308
+     -----------------------------------------------------------------------------
+     Information about pending messages
+     -----------------------------------------------------------------------------
+       Receipt of all sent messages has been confirmed
+     -----------------------------------------------------------------------------
+     Time-Warp performance statistics in this GVT interval
+     -----------------------------------------------------------------------------
+       Number of snapshots taken                      :   0
+       Current (and max) size of snapshot queue       :   0 of 957
+       Snapshot step adaptive interval                :   50
+       Number of restore operations performed         :   0
+       KMC time that was rerun due to rollbacks       :   0.000000000000000E+000
+       Ratio of the above over the GVT advancement    :   0.000000000000000E+000
+       KMC time spent in rollback propagation         :   0.000000000000000E+000
+       Ratio of the above over KMC time in rollbacks  :   [undefined]
+   ===============================================================================
+
+
+Simulation stopped:
+~~~~~~~~~~~~~~~~~~~
+ Current KMC time: 502.5333
+ Events occurred:  1372
+ Event frequency:  2.730167
+
+Performance facts:
+~~~~~~~~~~~~~~~~~~
+
+Elapsed CPU time:         38.52379 seconds
+Elapsed clock time:       5.861834 seconds
+Setup clock time:         0.8618330 seconds
+Simulation clock time:    5.000001 seconds
+
+Simulation clock time per KMC event: 3.6443155E-03 seconds
+Simulation clock time per KMC time:  9.9495910E-03 seconds/KMCTimeUnits
+
+Events per simulation clock hour:    987839
+KMC Dt per simulation clock hour:    361823.9 KMCTimeUnits
+
+Execution queue statistics:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Number of insertions:                 4341
+Number of removals:                   2751
+Number of updates:                   10622
+
+Memory usage statistics:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Used capacity of process queue:                    2049
+       ...out of max-allocated:                    6400  (  32.02% utilization )
+       ...with cap of:                            80000
+
+Used capacity of process-participation list:          5
+       ...out of max-allocated:                       8  (  62.50% utilization )
+       ...with cap of:                              200
+
+Used capacity of cluster list:                     1372
+       ...out of max-allocated:                    6400  (  21.44% utilization )
+       ...with cap of:                            80000
+
+Used capacity of cluster-participation list:          1
+       ...out of max-allocated:                       4  (  25.00% utilization )
+       ...with cap of:                               60
+
+(Note: monitoring of the memory footprint of temporary arrays is not yet supported for OpenMP runs).
+
+Restart information successfully written in file restart.inf.
+
+> Normal termination <

@@ -1,0 +1,44 @@
+# KMC lattice specification file for Pt(100)
+# Created by Michail Stamatakis on 17-Apr-2015.
+# Chemical Engineering Department - University College London.
+
+# Disclaimer: this input file is intended as an example only. We make no warranties of any kind about the suitability of the contents of this file for simulating any physical system, and hold no responsibility for any consequences resulting from doing so.
+
+lattice periodic_cell
+
+cell_vectors       # in row format (Angstroms)
+   6.133780000000000   0.000000000000000
+   0.000000000000000   6.133780000000000
+
+repeat_cell       20   20
+
+n_site_types      4
+site_type_names   top1 bridge1 top2 bridge2
+
+n_cell_sites      4
+site_types        top1 bridge1 top2 bridge2
+
+site_coordinates   # fractional coordinates (x,y) in row format
+   
+   0.000000000000000   0.000000000000000
+   0.000000000000000   0.250000000000000
+   0.000000000000000   0.500000000000000
+   0.000000000000000   0.750000000000000
+
+neighboring_structure # site-neighsite cell
+   
+   1-2  self
+   2-3  self
+   3-4  self
+   1-1  north
+   1-1  east
+   
+   2-1  north
+   2-1  northeast
+   2-1  east
+   2-2  north
+   2-2  east   
+
+end_neighboring_structure
+
+end_lattice
