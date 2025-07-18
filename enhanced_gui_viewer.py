@@ -1262,19 +1262,17 @@ Trails: {'ON' if self.show_trajectories else 'OFF'}"""
         # Apply theme to settings figure
         self.settings_fig.patch.set_facecolor(self.colors['bg'])
         
-        # Use subplot2grid for better layout control with more compact spacing
-        options_ax = plt.subplot2grid((4, 3), (0, 0), colspan=2, fig=self.settings_fig)
-        table_ax = plt.subplot2grid((4, 3), (1, 0), colspan=3, rowspan=2, fig=self.settings_fig)
-        buttons_ax = plt.subplot2grid((4, 3), (3, 0), colspan=3, fig=self.settings_fig)
+        # Use subplot2grid for better layout control - removed buttons row
+        options_ax = plt.subplot2grid((3, 3), (0, 0), colspan=2, fig=self.settings_fig)
+        table_ax = plt.subplot2grid((3, 3), (1, 0), colspan=3, rowspan=2, fig=self.settings_fig)
         
         # Apply theme colors to all axes
-        for ax in [options_ax, table_ax, buttons_ax]:
+        for ax in [options_ax, table_ax]:
             ax.set_facecolor(self.colors['panel'])
         
         # Setup each section
         self.setup_display_options(options_ax)
         self.setup_species_table(table_ax)
-        self.setup_control_buttons(buttons_ax)
         
         # Handle window close event
         self.settings_fig.canvas.mpl_connect('close_event', self.on_settings_window_close)
@@ -1363,41 +1361,9 @@ Trails: {'ON' if self.show_trajectories else 'OFF'}"""
         ax.axis('off')
     
     def setup_control_buttons(self, ax):
-        """Setup control buttons in a clean layout"""
-        ax.axis('off')
-        
-        # Create buttons within the subplot axes for proper layout integration
-        button_width = 0.25
-        button_height = 0.6
-        button_spacing = 0.05
-        
-        # Calculate button positions within the subplot
-        total_width = 3 * button_width + 2 * button_spacing
-        start_x = (1.0 - total_width) / 2
-        
-        # Create button axes within the subplot
-        reset_ax = ax.figure.add_axes([ax.get_position().x0 + start_x * ax.get_position().width, 
-                                      ax.get_position().y0 + 0.2 * ax.get_position().height,
-                                      button_width * ax.get_position().width, 
-                                      button_height * ax.get_position().height])
-        self.settings_reset_button = Button(reset_ax, 'Reset Defaults', color=self.colors['danger'])
-        self.settings_reset_button.on_clicked(self.reset_species_defaults)
-        
-        # Apply button  
-        apply_ax = ax.figure.add_axes([ax.get_position().x0 + (start_x + button_width + button_spacing) * ax.get_position().width,
-                                      ax.get_position().y0 + 0.2 * ax.get_position().height,
-                                      button_width * ax.get_position().width, 
-                                      button_height * ax.get_position().height])
-        self.settings_apply_button = Button(apply_ax, 'Apply Changes', color=self.colors['success'])
-        self.settings_apply_button.on_clicked(self.apply_species_changes)
-        
-        # Close button
-        close_ax = ax.figure.add_axes([ax.get_position().x0 + (start_x + 2 * (button_width + button_spacing)) * ax.get_position().width,
-                                      ax.get_position().y0 + 0.2 * ax.get_position().height,
-                                      button_width * ax.get_position().width, 
-                                      button_height * ax.get_position().height])
-        self.settings_close_button = Button(close_ax, 'Close', color=self.colors['accent'])
-        self.settings_close_button.on_clicked(self.close_settings_modal)
+        """Setup control buttons for the settings modal"""
+        # Button configuration removed - no buttons needed
+        pass
     
     def get_shape_display_name(self, shape):
         """Get display name for shape"""
@@ -1551,44 +1517,6 @@ Trails: {'ON' if self.show_trajectories else 'OFF'}"""
         """Refresh the table display after changes"""
         if hasattr(self, 'species_table'):
             plt.draw()
-    
-    def reset_species_defaults(self, event):
-        """Callback for resetting species properties to defaults"""
-        self.species_properties = {
-            'H*': {
-                'visible': True,
-                'color': '#FF4444',  # Bright red
-                'shape': 'o',        # Circle
-                'size': 40
-            },
-            'GeH2*': {
-                'visible': True,
-                'color': '#4477FF',  # Bright blue
-                'shape': 's',        # Square
-                'size': 80
-            },
-            'GeH3*': {
-                'visible': True,
-                'color': '#44AA44',  # Bright green
-                'shape': '^',        # Triangle
-                'size': 120
-            }
-        }
-        self.frame_cache.clear()
-        self.update_plot(self.current_step, force_redraw=True)
-        self.status_text.set_text('Species properties reset to defaults')
-    
-    def apply_species_changes(self, event):
-        """Callback for applying species property changes"""
-        self.frame_cache.clear()
-        self.update_plot(self.current_step, force_redraw=True)
-        self.status_text.set_text('Species properties applied')
-    
-    def close_settings_modal(self, event):
-        """Close settings modal window"""
-        if hasattr(self, 'settings_fig'):
-            plt.close(self.settings_fig)
-        self.settings_open = False
     
     def on_settings_window_close(self, event):
         """Handle settings window close event"""
