@@ -204,6 +204,7 @@ class EnhancedMolecularViewer:
         self.lattice_info = {}
         self.lattice_states = {}  # Store actual lattice states from history_output.txt
         self.surface_species = []  # Store surface species names
+        self.step_to_config = {}  # Map dataframe index to actual KMC step numbers
         
         # Animation and performance state
         self.current_step = 0
@@ -244,6 +245,16 @@ class EnhancedMolecularViewer:
         
         data_source = "lattice states" if self.lattice_states else "species counts"
         print(f"Enhanced viewer ready with {len(self.evolution_df)} time points using {data_source}")
+        
+        # Inform user about positioning strategy
+        if self.lattice_states:
+            print("✅ POSITIONING: Using exact lattice states from history_output.txt")
+            print("   → Molecules will show true KMC dynamics with site persistence")
+        else:
+            print("⚠️  POSITIONING: Using deterministic placement based on species counts")
+            print("   → No history_output.txt found - positions are approximated")
+            print("   → For exact visualization, ensure history_output.txt is available")
+        
         print("Keyboard shortcuts: Space=Play/Pause, R=Reset, Left/Right=Step, S=Save")
         
         plt.show()
@@ -309,6 +320,7 @@ class EnhancedMolecularViewer:
             # Parse header information
             self.surface_species = []
             self.lattice_states = {}  # {step: {site_id: species_id}}
+            self.step_to_config = {}  # Map dataframe index to actual KMC step
             evolution_data = []
             
             current_config = None
@@ -339,9 +351,14 @@ class EnhancedMolecularViewer:
                                 species_name = self.surface_species[species_id - 1]
                                 species_counts[species_name] += 1
                         
+                        # Store mapping from dataframe index to actual KMC step
+                        df_index = len(evolution_data)
+                        self.step_to_config[df_index] = current_step
+                        
                         evolution_data.append({
                             'step': current_step,
                             'time': current_time,
+                            'kmc_step': current_step,  # Store actual KMC step
                             **species_counts
                         })
                     
@@ -380,15 +397,25 @@ class EnhancedMolecularViewer:
                         species_name = self.surface_species[species_id - 1]
                         species_counts[species_name] += 1
                 
+                # Store mapping for the last configuration
+                df_index = len(evolution_data)
+                self.step_to_config[df_index] = current_step
+                
                 evolution_data.append({
                     'step': current_step,
                     'time': current_time,
+                    'kmc_step': current_step,  # Store actual KMC step
                     **species_counts
                 })
             
             self.evolution_df = pd.DataFrame(evolution_data)
             load_time = time.time() - start_time
             print(f"✅ Loaded {len(self.evolution_df)} configurations with actual lattice states in {load_time:.2f}s")
+            
+            # Debug: Show step mapping for first few configurations
+            if len(self.step_to_config) > 0:
+                sample_mappings = list(self.step_to_config.items())[:5]
+                print(f"📊 Sample step mappings: {sample_mappings}")
             
         except Exception as e:
             print(f"❌ Error loading history data: {e}")
@@ -805,8 +832,28 @@ class EnhancedMolecularViewer:
         geh3_count = int(current_data['GeH3*'])
         total_molecules = h_count + geh2_count + geh3_count
         
+        # Determine data source for positioning
+        has_history_data = hasattr(self, 'lattice_states') and self.lattice_states
+        data_source_info = ""
+        
+        if has_history_data:
+            actual_kmc_step = None
+            if hasattr(self, 'step_to_config') and step in self.step_to_config:
+                actual_kmc_step = self.step_to_config[step]
+            
+            if actual_kmc_step is not None and actual_kmc_step in self.lattice_states:
+                data_source_info = "Data: History (Exact)"
+                self.info_text.set_color(self.colors['success'])
+            else:
+                data_source_info = "Data: ERROR (Missing)"
+                self.info_text.set_color(self.colors['danger'])
+        else:
+            data_source_info = "⚠️ Data: Random (No History)"
+            self.info_text.set_color(self.colors['warning'])
+        
         info_text = f"""Time: {current_time:.2f}
 Step: {step+1}/{len(self.evolution_df)}
+{data_source_info}
 
 Molecules:
 H*: {h_count}
@@ -830,12 +877,27 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
         if step >= len(self.evolution_df):
             return {}
         
-        # Try to use actual lattice states if available
-        if hasattr(self, 'lattice_states') and self.lattice_states and step in self.lattice_states:
-            positions = self.generate_positions_from_lattice_state(step)
+        # Check if we have history data available
+        has_history_data = hasattr(self, 'lattice_states') and self.lattice_states
+        
+        if has_history_data:
+            # When history data is available, NEVER use random positioning
+            actual_kmc_step = None
+            if hasattr(self, 'step_to_config') and step in self.step_to_config:
+                actual_kmc_step = self.step_to_config[step]
+            
+            if actual_kmc_step is not None and actual_kmc_step in self.lattice_states:
+                positions = self.generate_positions_from_lattice_state(actual_kmc_step)
+            else:
+                # Report error to terminal - this should not happen with proper history data
+                print(f"❌ ERROR: No lattice state found for step {step} (KMC step {actual_kmc_step})")
+                print(f"   Available KMC steps: {list(self.lattice_states.keys())[:10]}...")
+                print(f"   This indicates a data parsing issue - please check history file integrity")
+                # Return empty positions rather than random ones
+                return {}
         else:
-            # Fallback to count-based positioning (improved algorithm)
-            positions = self.generate_positions_from_counts(step)
+            # Only use random positioning when NO history data is available
+            positions = self.generate_positions_from_counts_deterministic(step)
         
         # Cache the result
         if len(self.position_cache) >= self.max_position_cache:
@@ -846,9 +908,9 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
         self.position_cache[step] = positions
         return positions
     
-    def generate_positions_from_lattice_state(self, step):
+    def generate_positions_from_lattice_state(self, kmc_step):
         """Generate positions using actual lattice state data"""
-        lattice_state = self.lattice_states[step]
+        lattice_state = self.lattice_states[kmc_step]
         positions = {species: [] for species in getattr(self, 'surface_species', ['H*', 'GeH2*', 'GeH3*'])}
         
         # Map species IDs to species names
@@ -869,8 +931,8 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
         
         return positions
     
-    def generate_positions_from_counts(self, step):
-        """Fallback: Generate positions using species counts with improved persistence"""
+    def generate_positions_from_counts_deterministic(self, step):
+        """Deterministic fallback: Generate positions using species counts without randomness"""
         current_data = self.evolution_df.iloc[step]
         
         # Get species counts (handle both new and old column names)
@@ -888,14 +950,9 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
         if not all_sites:
             return {species: [] for species in species_counts.keys()}
         
-        # Improved algorithm: Use step-based seed for better consistency
-        # This creates more stable positioning between adjacent steps
-        base_seed = 42
-        np.random.seed(base_seed + (step // 10) * 7)  # Change seed less frequently
-        
-        occupied_sites = np.random.choice(all_sites, 
-                                        size=min(total_molecules, len(all_sites)), 
-                                        replace=False)
+        # Deterministic algorithm: Use first available sites consistently
+        # This eliminates all randomness for reproducible results
+        occupied_sites = all_sites[:min(total_molecules, len(all_sites))]
         
         positions = {}
         idx = 0
