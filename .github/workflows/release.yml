@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.10
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run tests
+      run: |
+        python -m py_compile enhanced_gui_viewer.py
+        python test_enhanced_gui.py
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## What's Changed
+          
+          ### Features
+          - Enhanced molecular visualization
+          - Real-time coverage charts
+          - Interactive species controls
+          
+          ### Bug Fixes
+          - Improved performance
+          - Better error handling
+          
+          ## Installation
+          ```bash
+          pip install -r requirements.txt
+          python enhanced_gui_viewer.py
+          ```
+        draft: false
+        prerelease: false 
