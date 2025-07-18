@@ -132,11 +132,11 @@ dmypy.json
 # ======================
 
 # KMC simulation output files
-input-output/*.txt
-input-output/*.out
-input-output/*.inf
-input-output/a
-input-output/slurm-*
+# input-output/*.txt
+# input-output/*.out
+# input-output/*.inf
+# input-output/a
+# input-output/slurm-*
 
 # Backup files
 backup/

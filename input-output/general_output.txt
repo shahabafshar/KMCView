@@ -23,7 +23,7 @@ Threading/multiprocessing information:
 
     Distributed run with 1 MPI process, each with 16 OpenMP threads.
     The rank of this MPI process is 0.
-    The name of this processor is "eu10".
+    The name of this processor is "eu06".
 
 Simulation setup:
 ~~~~~~~~~~~~~~~~~
@@ -70,7 +70,7 @@ Simulation setup:
 
     The default Mersenne Twister 19937 random number generator will be used for this simulation.
 
-    Initializing the random number generator took 0.745310000000000 seconds
+    Initializing the random number generator took 0.740973000000000 seconds
 
     The default first reaction method will be used for propagating the KMC state, with a binary heap for the event-queue
 
@@ -231,8 +231,8 @@ Commencing simulation:
 
    All messages sent by all MPI-processes have been confirmed as received...
 
-   Entered GVT-comp block at: 5.00000100000000
-   After MPI-reduction:       5.00004600000000
+   Entered GVT-comp block at: 5.00000400000000
+   After MPI-reduction:       5.00005300000000
      --------------------------------------------------------------------------
      Different times involved in the Time-Warp algorithm
      -----------------------------------------------------------------------------
@@ -268,16 +268,16 @@ Simulation stopped:
 Performance facts:
 ~~~~~~~~~~~~~~~~~~
 
-Elapsed CPU time:         38.52379 seconds
-Elapsed clock time:       5.861834 seconds
-Setup clock time:         0.8618330 seconds
-Simulation clock time:    5.000001 seconds
+Elapsed CPU time:         37.93432 seconds
+Elapsed clock time:       5.907189 seconds
+Setup clock time:         0.9071850 seconds
+Simulation clock time:    5.000004 seconds
 
-Simulation clock time per KMC event: 3.6443155E-03 seconds
-Simulation clock time per KMC time:  9.9495910E-03 seconds/KMCTimeUnits
+Simulation clock time per KMC event: 3.6443179E-03 seconds
+Simulation clock time per KMC time:  9.9495966E-03 seconds/KMCTimeUnits
 
 Events per simulation clock hour:    987839
-KMC Dt per simulation clock hour:    361823.9 KMCTimeUnits
+KMC Dt per simulation clock hour:    361823.7 KMCTimeUnits
 
 Execution queue statistics:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

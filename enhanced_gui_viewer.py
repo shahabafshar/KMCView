@@ -202,6 +202,8 @@ class EnhancedMolecularViewer:
         self.coordinates = {}
         self.lattice_bounds = {}
         self.lattice_info = {}
+        self.lattice_states = {}  # Store actual lattice states from history_output.txt
+        self.surface_species = []  # Store surface species names
         
         # Animation and performance state
         self.current_step = 0
@@ -240,7 +242,8 @@ class EnhancedMolecularViewer:
         # Show initial frame
         self.update_plot(0)
         
-        print(f"Enhanced viewer ready with {len(self.evolution_df)} time points")
+        data_source = "lattice states" if self.lattice_states else "species counts"
+        print(f"Enhanced viewer ready with {len(self.evolution_df)} time points using {data_source}")
         print("Keyboard shortcuts: Space=Play/Pause, R=Reset, Left/Right=Step, S=Save")
         
         plt.show()
@@ -283,12 +286,123 @@ class EnhancedMolecularViewer:
         })
     
     def load_data(self):
-        """Load species evolution data with progress feedback"""
+        """Load species evolution data and lattice states from history file"""
+        # First try to load from history_output.txt (actual lattice states)
+        history_file = os.path.join(self.data_dir, 'history_output.txt')
+        
+        if os.path.exists(history_file):
+            print(f"📊 Loading lattice states from {history_file}...")
+            self.load_history_data(history_file)
+        else:
+            # Fallback to specnum_output.txt (counts only)
+            print("⚠️ No history_output.txt found, falling back to species counts...")
+            self.load_specnum_data()
+    
+    def load_history_data(self, history_file):
+        """Load actual lattice states from history_output.txt"""
+        start_time = time.time()
+        
+        try:
+            with open(history_file, 'r') as f:
+                lines = f.readlines()
+            
+            # Parse header information
+            self.surface_species = []
+            self.lattice_states = {}  # {step: {site_id: species_id}}
+            evolution_data = []
+            
+            current_config = None
+            current_step = None
+            current_time = None
+            current_sites = {}
+            
+            i = 0
+            while i < len(lines):
+                line = lines[i].strip()
+                
+                # Parse surface species from header
+                if line.startswith('Surface_Species:'):
+                    species_line = line.split(':')[1].strip()
+                    self.surface_species = species_line.split()
+                    print(f"Found surface species: {self.surface_species}")
+                
+                # Parse configuration blocks
+                elif line.startswith('configuration'):
+                    # Save previous configuration if exists
+                    if current_config is not None and current_step is not None:
+                        self.lattice_states[current_step] = current_sites.copy()
+                        
+                        # Count species for this configuration
+                        species_counts = {species: 0 for species in self.surface_species}
+                        for site_id, species_id in current_sites.items():
+                            if species_id > 0 and species_id <= len(self.surface_species):
+                                species_name = self.surface_species[species_id - 1]
+                                species_counts[species_name] += 1
+                        
+                        evolution_data.append({
+                            'step': current_step,
+                            'time': current_time,
+                            **species_counts
+                        })
+                    
+                    # Parse new configuration
+                    parts = line.split()
+                    if len(parts) >= 6:
+                        current_config = int(parts[1])
+                        current_step = int(parts[2])
+                        current_time = float(parts[3])
+                        current_sites = {}
+                        
+                        if current_config % 10 == 0:
+                            print(f"   Processing configuration {current_config}, step {current_step}...")
+                
+                # Parse site data
+                elif line and not line.startswith(('Gas_Species:', 'Surface_Species:', 'Simulation_Box:', 'Site_Types:')):
+                    try:
+                        parts = line.split()
+                        if len(parts) >= 5:
+                            site_id = int(parts[0])
+                            site_type = int(parts[1])
+                            species_id = int(parts[2])
+                            current_sites[site_id] = species_id
+                    except (ValueError, IndexError):
+                        pass
+                
+                i += 1
+            
+            # Save the last configuration
+            if current_config is not None and current_step is not None:
+                self.lattice_states[current_step] = current_sites.copy()
+                
+                species_counts = {species: 0 for species in self.surface_species}
+                for site_id, species_id in current_sites.items():
+                    if species_id > 0 and species_id <= len(self.surface_species):
+                        species_name = self.surface_species[species_id - 1]
+                        species_counts[species_name] += 1
+                
+                evolution_data.append({
+                    'step': current_step,
+                    'time': current_time,
+                    **species_counts
+                })
+            
+            self.evolution_df = pd.DataFrame(evolution_data)
+            load_time = time.time() - start_time
+            print(f"✅ Loaded {len(self.evolution_df)} configurations with actual lattice states in {load_time:.2f}s")
+            
+        except Exception as e:
+            print(f"❌ Error loading history data: {e}")
+            print("   Falling back to specnum_output.txt...")
+            self.load_specnum_data()
+    
+    def load_specnum_data(self):
+        """Fallback method to load species counts from specnum_output.txt"""
         data_file = os.path.join(self.data_dir, 'specnum_output.txt')
         
         if not os.path.exists(data_file):
             print(f"❌ Data file not found: {data_file}")
             self.evolution_df = pd.DataFrame({'time': [0.0], 'H*': [0.0], 'GeH2*': [0.0], 'GeH3*': [0.0]})
+            self.lattice_states = {}
             return
         
         print(f"📊 Loading evolution data from {data_file}...")
@@ -310,7 +424,7 @@ class EnhancedMolecularViewer:
                             float(parts[0])  # Test if numeric
                             step = int(parts[0])
                             nevents = int(parts[1])
-                            sim_time = float(parts[2])  # Renamed to avoid conflict with time module
+                            sim_time = float(parts[2])
                             h_star = float(parts[5]) if len(parts) > 5 else 0.0
                             geh2_star = float(parts[6]) if len(parts) > 6 else 0.0
                             geh3_star = float(parts[7]) if len(parts) > 7 else 0.0
@@ -318,7 +432,7 @@ class EnhancedMolecularViewer:
                             data.append({
                                 'step': step,
                                 'nevents': nevents,
-                                'time': sim_time,  # Use renamed variable
+                                'time': sim_time,
                                 'H*': h_star,
                                 'GeH2*': geh2_star,
                                 'GeH3*': geh3_star
@@ -327,12 +441,14 @@ class EnhancedMolecularViewer:
                         continue
             
             self.evolution_df = pd.DataFrame(data)
+            self.lattice_states = {}  # No lattice states available
             load_time = time.time() - start_time
             print(f"Loaded {len(self.evolution_df)} time points in {load_time:.2f}s")
             
         except Exception as e:
             print(f"❌ Error loading data: {e}")
             self.evolution_df = pd.DataFrame({'time': [0.0], 'H*': [0.0], 'GeH2*': [0.0], 'GeH3*': [0.0]})
+            self.lattice_states = {}
     
     def load_positions(self):
         """Load lattice positions with enhanced caching"""
@@ -706,7 +822,7 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
         self.info_text.set_text(info_text)
     
     def generate_positions_for_step(self, step):
-        """Generate molecular positions (using internal cache)"""
+        """Generate molecular positions using actual lattice states or fallback to counts"""
         # Check cache first
         if step in self.position_cache:
             return self.position_cache[step]
@@ -714,38 +830,12 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
         if step >= len(self.evolution_df):
             return {}
         
-        current_data = self.evolution_df.iloc[step]
-        h_count = int(current_data['H*'])
-        geh2_count = int(current_data['GeH2*'])
-        geh3_count = int(current_data['GeH3*'])
-        
-        total_molecules = h_count + geh2_count + geh3_count
-        
-        if total_molecules == 0:
-            return {}
-        
-        # Use available site coordinates
-        all_sites = list(self.coordinates.keys())
-        if not all_sites:
-            return {}
-        
-        # Generate consistent positions with better randomization
-        np.random.seed(42 + step * 7)  # More varied seed
-        occupied_sites = np.random.choice(all_sites, 
-                                        size=min(total_molecules, len(all_sites)), 
-                                        replace=False)
-        
-        positions = {}
-        idx = 0
-        
-        # Assign positions to species with spatial clustering simulation
-        for species, count in [('H*', h_count), ('GeH2*', geh2_count), ('GeH3*', geh3_count)]:
-            positions[species] = []
-            for _ in range(count):
-                if idx < len(occupied_sites):
-                    site_id = occupied_sites[idx]
-                    positions[species].append(self.coordinates[site_id])
-                    idx += 1
+        # Try to use actual lattice states if available
+        if hasattr(self, 'lattice_states') and self.lattice_states and step in self.lattice_states:
+            positions = self.generate_positions_from_lattice_state(step)
+        else:
+            # Fallback to count-based positioning (improved algorithm)
+            positions = self.generate_positions_from_counts(step)
         
         # Cache the result
         if len(self.position_cache) >= self.max_position_cache:
@@ -754,6 +844,72 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
             del self.position_cache[oldest_key]
         
         self.position_cache[step] = positions
+        return positions
+    
+    def generate_positions_from_lattice_state(self, step):
+        """Generate positions using actual lattice state data"""
+        lattice_state = self.lattice_states[step]
+        positions = {species: [] for species in getattr(self, 'surface_species', ['H*', 'GeH2*', 'GeH3*'])}
+        
+        # Map species IDs to species names
+        species_map = {}
+        if hasattr(self, 'surface_species'):
+            for i, species in enumerate(self.surface_species):
+                species_map[i + 1] = species  # species_id starts from 1
+        else:
+            # Default mapping for backward compatibility
+            species_map = {1: 'H*', 2: 'GeH2*', 3: 'GeH3*'}
+        
+        # Place molecules based on actual site occupancy
+        for site_id, species_id in lattice_state.items():
+            if species_id > 0 and species_id in species_map:
+                species_name = species_map[species_id]
+                if site_id in self.coordinates and species_name in positions:
+                    positions[species_name].append(self.coordinates[site_id])
+        
+        return positions
+    
+    def generate_positions_from_counts(self, step):
+        """Fallback: Generate positions using species counts with improved persistence"""
+        current_data = self.evolution_df.iloc[step]
+        
+        # Get species counts (handle both new and old column names)
+        species_counts = {}
+        for species in ['H*', 'GeH2*', 'GeH3*']:
+            species_counts[species] = int(current_data.get(species, 0))
+        
+        total_molecules = sum(species_counts.values())
+        
+        if total_molecules == 0:
+            return {species: [] for species in species_counts.keys()}
+        
+        # Use available site coordinates
+        all_sites = list(self.coordinates.keys())
+        if not all_sites:
+            return {species: [] for species in species_counts.keys()}
+        
+        # Improved algorithm: Use step-based seed for better consistency
+        # This creates more stable positioning between adjacent steps
+        base_seed = 42
+        np.random.seed(base_seed + (step // 10) * 7)  # Change seed less frequently
+        
+        occupied_sites = np.random.choice(all_sites, 
+                                        size=min(total_molecules, len(all_sites)), 
+                                        replace=False)
+        
+        positions = {}
+        idx = 0
+        
+        # Assign positions to species with consistent ordering
+        for species in ['H*', 'GeH2*', 'GeH3*']:
+            count = species_counts[species]
+            positions[species] = []
+            for _ in range(count):
+                if idx < len(occupied_sites):
+                    site_id = occupied_sites[idx]
+                    positions[species].append(self.coordinates[site_id])
+                    idx += 1
+        
         return positions
     
     # Enhanced callback methods
