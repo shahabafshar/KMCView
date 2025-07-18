@@ -613,6 +613,20 @@ class EnhancedMolecularViewer:
         
         return occupied_sites / total_sites * 100  # Return as percentage
 
+    def calculate_species_coverage(self, step, species):
+        """Calculate coverage for a specific species at a given step"""
+        if step >= len(self.evolution_df):
+            return 0.0
+        
+        current_data = self.evolution_df.iloc[step]
+        total_sites = len(self.coordinates)
+        
+        if total_sites == 0:
+            return 0.0
+        
+        species_count = int(current_data.get(species, 0))
+        return species_count / total_sites * 100  # Return as percentage
+
     def update_mini_charts(self, step):
         """Update all mini charts with current step data"""
         # Update surface coverage chart
@@ -622,31 +636,54 @@ class EnhancedMolecularViewer:
         self.update_coverage_pie_chart(step)
     
     def update_coverage_chart(self, step):
-        """Update surface coverage chart"""
+        """Update surface coverage chart with individual species coverage"""
         self.coverage_ax.clear()
         self.coverage_ax.set_facecolor(self.colors['panel'])
         
         # Calculate coverage for all steps up to current
         steps = list(range(min(step + 1, len(self.evolution_df))))
-        coverages = [self.calculate_surface_coverage(s) for s in steps]
         times = [self.evolution_df.iloc[s]['time'] for s in steps]
         
-        # Plot coverage evolution
-        self.coverage_ax.plot(times, coverages, color=self.colors['accent'], linewidth=2)
+        # Plot individual species coverage using colors from settings
+        species_list = ['H*', 'GeH2*', 'GeH3*']
+        for species in species_list:
+            # Get species color from settings, with fallback
+            species_color = self.species_properties.get(species, {}).get('color', '#888888')
+            
+            # Calculate species coverage
+            species_coverages = [self.calculate_species_coverage(s, species) for s in steps]
+            
+            # Only plot if species is visible in settings
+            if self.species_properties.get(species, {}).get('visible', True):
+                # Ensure minimum line visibility by adding a small offset if all values are very small
+                max_coverage = max(species_coverages) if species_coverages else 0
+                if max_coverage < 0.1:  # If coverage is very small, add a small offset for visibility
+                    species_coverages = [c + 0.01 for c in species_coverages]
+                
+                self.coverage_ax.plot(times, species_coverages, color=species_color, 
+                                     linewidth=2, label=f'{species} Coverage', alpha=0.8)
         
-        # Add current point highlight
+        # Add current point highlights
         if step < len(self.evolution_df):
             current_time = self.evolution_df.iloc[step]['time']
-            current_coverage = coverages[-1]
-            self.coverage_ax.scatter([current_time], [current_coverage], 
-                                   color=self.colors['success'], s=50, zorder=5)
+            
+            # Add current points for individual species
+            for species in species_list:
+                if self.species_properties.get(species, {}).get('visible', True):
+                    species_color = self.species_properties.get(species, {}).get('color', '#888888')
+                    current_species_coverage = self.calculate_species_coverage(step, species)
+                    self.coverage_ax.scatter([current_time], [current_species_coverage], 
+                                           color=species_color, s=50, zorder=5, alpha=0.9)
         
         # Formatting
         self.coverage_ax.set_xlabel('Time', fontsize=8, color=self.colors['text'])
         self.coverage_ax.set_ylabel('Coverage (%)', fontsize=8, color=self.colors['text'])
         self.coverage_ax.tick_params(axis='both', which='major', labelsize=7, colors=self.colors['text'])
         self.coverage_ax.grid(True, alpha=0.3)
-        self.coverage_ax.set_title('Surface Coverage', fontsize=10, color=self.colors['text'], pad=5)
+        self.coverage_ax.set_title('Species Coverage', fontsize=10, color=self.colors['text'], pad=5)
+        
+        # Add legend
+        self.coverage_ax.legend(loc='upper left', fontsize=6, framealpha=0.8)
     
     def update_coverage_pie_chart(self, step):
         """Update current coverage pie chart for the given step"""
@@ -663,10 +700,15 @@ class EnhancedMolecularViewer:
             geh3_current = int(current_data.get('GeH3*', 0))
             empty_current = len(self.coordinates) - h_current - geh2_current - geh3_current
             
-            # Create pie chart
+            # Create pie chart using colors from settings
             sizes = [h_current, geh2_current, geh3_current, empty_current]
             labels = ['H*', 'GeH2*', 'GeH3*', 'Empty']
-            colors = ['#FF4444', '#4477FF', '#44AA44', '#CCCCCC']
+            
+            # Get colors from species properties settings
+            h_color = self.species_properties.get('H*', {}).get('color', '#FF4444')
+            geh2_color = self.species_properties.get('GeH2*', {}).get('color', '#4477FF')
+            geh3_color = self.species_properties.get('GeH3*', {}).get('color', '#44AA44')
+            colors = [h_color, geh2_color, geh3_color, '#CCCCCC']  # Empty sites remain gray
             
             # Only show non-zero slices
             non_zero_data = [(s, l, c) for s, l, c in zip(sizes, labels, colors) if s > 0]
