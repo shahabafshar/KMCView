@@ -1,6 +1,15 @@
-# Zacros Molecular Evolution Viewer
+# KMCView: Kinetic Monte Carlo Visualization Tool
 
-🔬 **Interactive visualization tools for Zacros kinetic Monte Carlo simulation data**
+```
+██╗  ██╗███╗   ███╗ ██████╗ ██╗   ██╗██╗███████╗██╗    ██╗
+██║ ██╔╝████╗ ████║██╔═══██╗██║   ██║██║██╔════╝██║    ██║
+█████╔╝ ██╔████╔██║██║      ██║   ██║██║█████╗  ██║ █╗ ██║
+██╔═██╗ ██║╚██╔╝██║██║   ██║╚██╗ ██╔╝██║██╔══╝  ██║███╗██║
+██║  ██╗██║ ╚═╝ ██║╚██████╔╝ ╚████╔╝ ██║███████╗╚███╔███╔╝
+╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝   ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ 
+```
+
+🔬 **Interactive visualization tools for kinetic Monte Carlo simulation data**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -9,7 +18,7 @@
 
 ## 🎯 Overview
 
-This project provides two interactive visualization tools for analyzing Zacros kinetic Monte Carlo (KMC) simulation data:
+This project provides two interactive visualization tools for analyzing kinetic Monte Carlo (KMC) simulation data:
 
 1. **📊 Matplotlib Viewer** (`fixed_matplotlib_viewer.py`) - Desktop application with animation controls
 2. **🌐 Web Viewer** (`fixed_web_viewer.py`) - Browser-based interactive dashboard
@@ -67,8 +76,8 @@ See `requirements.txt` for complete dependency list.
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/zacros-molecular-viewer.git
-cd zacros-molecular-viewer
+git clone https://github.com/yourusername/kmcview.git
+cd kmcview
 ```
 
 ### 2. Create Virtual Environment (Recommended)
@@ -90,10 +99,9 @@ python test_enhanced_viewers.py
 ## 📁 Project Structure
 
 ```
-zacros-molecular-viewer/
-├── fixed_matplotlib_viewer.py    # Desktop matplotlib viewer
-├── fixed_web_viewer.py           # Web-based Dash viewer
-├── test_enhanced_viewers.py      # Test suite
+kmcview/
+├── enhanced_gui_viewer.py        # Enhanced GUI viewer
+├── test_enhanced_gui.py          # Test suite
 ├── requirements.txt              # Python dependencies
 ├── README.md                     # This file
 ├── .gitignore                    # Git ignore rules
@@ -101,7 +109,7 @@ zacros-molecular-viewer/
     ├── lattice_input.dat         # Lattice structure definition
     ├── specnum_output.txt        # Species evolution data
     ├── lattice_output.txt        # Site coordinates
-    └── ...                       # Other Zacros output files
+    └── ...                       # Other KMC output files
 ```
 
 ## 🎮 Usage
@@ -110,12 +118,12 @@ zacros-molecular-viewer/
 
 **Basic Usage:**
 ```bash
-python fixed_matplotlib_viewer.py
+python enhanced_gui_viewer.py
 ```
 
 **Custom Data Directory:**
 ```bash
-python fixed_matplotlib_viewer.py /path/to/your/data
+python enhanced_gui_viewer.py /path/to/your/data
 ```
 
 **Features:**
@@ -129,21 +137,22 @@ python fixed_matplotlib_viewer.py /path/to/your/data
 
 **Basic Usage:**
 ```bash
-python fixed_web_viewer.py
-# Open http://127.0.0.1:8050 in your browser
+python enhanced_gui_viewer.py
+# The GUI will open automatically
 ```
 
 **Custom Configuration:**
 ```bash
-python fixed_web_viewer.py /path/to/data 8051
+python enhanced_gui_viewer.py --data-dir /path/to/data --theme light
 ```
 
 **Features:**
-- 🌐 **Browser-Based**: Access from any device on the network
-- 📱 **Responsive Design**: Works on desktop, tablet, and mobile
+- 🖥️ **Desktop Application**: Native GUI with modern interface
+- 🎨 **Theme Support**: Dark and light themes
 - 🔄 **Real-Time Updates**: Live animation controls
-- 💬 **Hover Information**: Detailed molecule and site data
-- 📊 **Interactive Legend**: Toggle species visibility
+- ⌨️ **Keyboard Shortcuts**: Space=Play/Pause, R=Reset, ←/→=Step
+- 📊 **Interactive Controls**: Speed slider, step navigation
+- 💾 **Export Functionality**: Save high-quality plots
 
 ## 📊 Data Format
 
@@ -198,32 +207,32 @@ If files are missing or corrupted, the viewers use default parameters:
 
 Run the test suite to verify installation:
 ```bash
-python test_enhanced_viewers.py
+python test_enhanced_gui.py
 ```
 
 **Test Coverage:**
-- ✅ Lattice parser functionality
-- ✅ Position generation algorithms
-- ✅ File path configurations
+- ✅ Enhanced GUI viewer initialization
+- ✅ Data loading functionality
+- ✅ Lattice structure parsing
 - ✅ Error handling and fallbacks
-- ✅ Command line argument parsing
+- ✅ Performance optimizations
 
 ## 🎨 Customization
 
 ### Adding New Species
-1. Update species detection in `load_data()` methods
-2. Add color and size mappings in `update_plot()` functions
+1. Update species detection in `load_data()` method
+2. Add color and size mappings in `update_plot()` function
 3. Modify the position generation logic if needed
 
 ### Changing Visualization Style
-- **Colors**: Modify the `colors` dictionary in plot functions
+- **Colors**: Modify the `colors` dictionary in plot function
 - **Sizes**: Adjust the `sizes` dictionary for molecule scaling
 - **Grid**: Customize lattice grid appearance in plot sections
 
 ### Performance Optimization
-- **Large Datasets**: Implement data sampling for >1000 time steps
-- **Memory Usage**: Add data chunking for massive simulations
-- **Rendering**: Optimize plot updates for smoother animation
+- **Large Datasets**: Data sampling for >1000 time steps
+- **Memory Usage**: Data chunking for massive simulations
+- **Rendering**: Optimized plot updates for smoother animation
 
 ## 🐛 Troubleshooting
 
@@ -247,17 +256,17 @@ Play button doesn't respond
 ```
 **Solution:** Ensure matplotlib backend supports interactive widgets
 
-**4. Web Viewer Port Error**
+**4. GUI Not Responding**
 ```bash
-Address already in use: 8050
+Animation controls not working
 ```
-**Solution:** Use different port: `python fixed_web_viewer.py data 8051`
+**Solution:** Ensure matplotlib backend supports interactive widgets
 
 ### Debug Mode
 Enable detailed logging:
 ```bash
-python -u fixed_matplotlib_viewer.py  # Unbuffered output
-PYTHONPATH=. python fixed_web_viewer.py  # Full path resolution
+python -u enhanced_gui_viewer.py  # Unbuffered output
+PYTHONPATH=. python enhanced_gui_viewer.py  # Full path resolution
 ```
 
 ## 📈 Performance
@@ -271,7 +280,7 @@ PYTHONPATH=. python fixed_web_viewer.py  # Full path resolution
 ### Optimization Tips
 1. **Data Preprocessing**: Clean input files before visualization
 2. **Selective Loading**: Use custom data ranges for large simulations
-3. **Browser Performance**: Close other tabs when using web viewer
+3. **System Performance**: Close other applications when using the viewer
 4. **Hardware**: SSD storage recommended for large datasets
 
 ## 🤝 Contributing
@@ -281,7 +290,7 @@ We welcome contributions! Please follow these steps:
 1. **Fork the repository**
 2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
 3. **Make your changes** and add tests
-4. **Run the test suite**: `python test_enhanced_viewers.py`
+4. **Run the test suite**: `python test_enhanced_gui.py`
 5. **Submit a pull request**
 
 ### Development Setup
@@ -304,9 +313,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Zacros Development Team** for the excellent KMC simulation software
+- **KMC Community** for the excellent simulation software
 - **Matplotlib & Plotly Communities** for visualization frameworks
-- **Dash Team** for the web application framework
+- **Matplotlib Team** for the visualization framework
 - **Scientific Python Community** for the foundational libraries
 
 ## 📞 Support
@@ -314,7 +323,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Issues**: Report bugs on GitHub Issues
 - **Discussions**: Join our GitHub Discussions
 - **Email**: contact@yourproject.com
-- **Documentation**: Visit our [Wiki](https://github.com/yourusername/zacros-molecular-viewer/wiki)
+- **Documentation**: Visit our [Wiki](https://github.com/yourusername/kmcview/wiki)
 
 ## 🔮 Future Enhancements
 
@@ -329,4 +338,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for the computational chemistry community**
 
-*Last updated: 2024* 

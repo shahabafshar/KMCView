@@ -1,18 +1,18 @@
-# Zacros-Vy Project Structure (Minimalist)
+# KMCView Project Structure (Minimalist)
 
-This project is now streamlined to focus on the **Enhanced GUI Viewer** for Zacros kinetic Monte Carlo simulation data.
+This project is now streamlined to focus on the **Enhanced GUI Viewer** for kinetic Monte Carlo simulation data.
 
 ## 🎯 Current Active Files
 
 ```
-Zacros-Vy/
+KMCView/
 ├── 📄 enhanced_gui_viewer.py    # Main enhanced GUI application
 ├── 📄 test_enhanced_gui.py      # Tests for the GUI viewer
 ├── 📄 requirements.txt          # Python dependencies
 ├── 📄 README.md                 # Project documentation
 ├── 📄 LICENSE                   # MIT License
 ├── 📄 .gitignore               # Git ignore rules
-├── 📁 input-output/            # Zacros simulation data
+├── 📁 input-output/            # KMC simulation data
 ├── 📁 backup/                  # Archive of old versions
 ├── 📁 .git/                    # Git repository
 ├── 📁 .venv/                   # Python virtual environment

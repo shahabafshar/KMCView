@@ -131,7 +131,7 @@ dmypy.json
 # Project-specific ignores
 # ======================
 
-# Zacros simulation output files
+# KMC simulation output files
 input-output/*.txt
 input-output/*.out
 input-output/*.inf

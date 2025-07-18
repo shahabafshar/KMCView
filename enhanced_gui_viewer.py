@@ -391,7 +391,7 @@ class EnhancedMolecularViewer:
         """Setup the main figure with modern layout"""
         # Create figure with optimal size and DPI
         self.fig = plt.figure(figsize=(16, 10), dpi=100)
-        self.fig.suptitle('Enhanced Zacros Molecular Evolution Viewer', 
+        self.fig.suptitle('KMCView - Enhanced Molecular Evolution Viewer', 
                          fontsize=16, fontweight='bold', color=self.colors['text'])
         
         # Main plot area (larger)
@@ -848,7 +848,7 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
     def export_frame(self, event):
         """Export current frame with enhanced options"""
         try:
-            filename = f"zacros_frame_step_{self.current_step:04d}.{self.export_format}"
+            filename = f"kmcview_frame_step_{self.current_step:04d}.{self.export_format}"
             
             # Create a clean figure for export
             export_fig, export_ax = plt.subplots(figsize=(12, 10), dpi=300)
@@ -897,7 +897,7 @@ Cell: {self.lattice_bounds['cell_size_x']:.1f}x{self.lattice_bounds['cell_size_y
             export_ax.legend()
             
             current_time = current_data['time']
-            export_ax.set_title(f'Zacros Molecular Evolution - Step {self.current_step+1} (t={current_time:.2f})', 
+            export_ax.set_title(f'KMC Molecular Evolution - Step {self.current_step+1} (t={current_time:.2f})', 
                               fontsize=16, pad=20)
             
             # Save with high quality
@@ -937,15 +937,26 @@ def main():
     """Enhanced main function with argument parsing"""
     import argparse
     
-    parser = argparse.ArgumentParser(description='Enhanced Zacros Molecular Evolution Viewer')
+    # ASCII Art Banner
+    ascii_art = """
+██╗  ██╗███╗   ███╗ ██████╗ ██╗   ██╗██╗███████╗██╗    ██╗
+██║ ██╔╝████╗ ████║██╔═══██╗██║   ██║██║██╔════╝██║    ██║
+█████╔╝ ██╔████╔██║██║      ██║   ██║██║█████╗  ██║ █╗ ██║
+██╔═██╗ ██║╚██╔╝██║██║   ██║╚██╗ ██╔╝██║██╔══╝  ██║███╗██║
+██║  ██╗██║ ╚═╝ ██║╚██████╔╝ ╚████╔╝ ██║███████╗╚███╔███╔╝
+╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝   ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ 
+"""
+    
+    parser = argparse.ArgumentParser(description='KMCView - Enhanced Molecular Evolution Viewer')
     parser.add_argument('--data-dir', '-d', default='input-output', 
-                       help='Directory containing Zacros output files')
+                       help='Directory containing KMC output files')
     parser.add_argument('--theme', '-t', choices=['dark', 'light'], default='dark',
                        help='UI theme (dark or light)')
     
     args = parser.parse_args()
     
-    print(f"🚀 Starting Enhanced Zacros Molecular Viewer")
+    print(ascii_art)
+    print(f"🚀 Starting KMCView - Enhanced Molecular Viewer")
     print(f"📁 Data directory: {args.data_dir}")
     print(f"🎨 Theme: {args.theme}")
     
