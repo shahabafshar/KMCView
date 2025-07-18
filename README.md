@@ -327,7 +327,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: Report bugs on GitHub Issues
 - **Discussions**: Join our GitHub Discussions
-- **Email**: contact@yourproject.com
+- **Email**: shahab.afshar@outlook.com
 - **Documentation**: Visit our [Wiki](https://github.com/shahabafshar/kmcview/wiki)
 
 ## 🔮 Future Enhancements
