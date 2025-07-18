@@ -20,7 +20,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, TextBox, RadioButtons, CheckButtons
-from matplotlib.table import Table
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Rectangle
 import matplotlib.patches as patches
@@ -195,9 +194,10 @@ class EnhancedLatticeParser:
 class EnhancedMolecularViewer:
     """Enhanced GUI viewer with modern UX and performance optimizations"""
     
-    def __init__(self, data_dir='input-output'):
+    def __init__(self, data_dir='input-output', theme='dark'):
         """Initialize the enhanced viewer"""
         self.data_dir = data_dir
+        self.theme = theme
         self.evolution_df = pd.DataFrame()
         self.coordinates = {}
         self.lattice_bounds = {}
@@ -218,6 +218,7 @@ class EnhancedMolecularViewer:
         self.show_lattice_grid = True
         self.show_empty_sites = True
         self.show_trajectories = False
+        self.export_format = 'png'
         
         # Species properties configuration (editable data grid)
         self.species_properties = {
@@ -256,6 +257,7 @@ class EnhancedMolecularViewer:
         # Initialize everything
         print(f"🚀 Starting Enhanced Molecular Viewer...")
         print(f"📁 Data directory: {data_dir}")
+        print(f"🎨 Theme: {theme}")
         
         self.load_data()
         self.load_positions()
@@ -279,22 +281,34 @@ class EnhancedMolecularViewer:
             print("   → No history_output.txt found - positions are approximated")
             print("   → For exact visualization, ensure history_output.txt is available")
         
-        print("Keyboard shortcuts: Space=Play/Pause, R=Reset, Left/Right=Step")
+        print("Keyboard shortcuts: Space=Play/Pause, R=Reset, Left/Right=Step, S=Save")
         
         plt.show()
     
     def setup_theme(self):
-        """Setup consistent styling"""
-        plt.style.use('default')
-        self.colors = {
-            'bg': '#FFFFFF',
-            'panel': '#F8F9FA',
-            'text': '#212529',
-            'accent': '#007BFF',
-            'success': '#28A745',
-            'warning': '#FFC107',
-            'danger': '#DC3545'
-        }
+        """Setup modern theme styling"""
+        if self.theme == 'dark':
+            plt.style.use('dark_background')
+            self.colors = {
+                'bg': '#2E2E2E',
+                'panel': '#3E3E3E',
+                'text': '#FFFFFF',
+                'accent': '#4A90E2',
+                'success': '#5CB85C',
+                'warning': '#F0AD4E',
+                'danger': '#D9534F'
+            }
+        else:
+            plt.style.use('default')
+            self.colors = {
+                'bg': '#FFFFFF',
+                'panel': '#F8F9FA',
+                'text': '#212529',
+                'accent': '#007BFF',
+                'success': '#28A745',
+                'warning': '#FFC107',
+                'danger': '#DC3545'
+            }
         
         # Set global font properties
         plt.rcParams.update({
@@ -543,189 +557,91 @@ class EnhancedMolecularViewer:
                         site_id += 1
     
     def setup_figure(self):
-        """Setup the main figure with improved layout and mini charts"""
-        # Create figure with larger size to accommodate mini charts
-        self.fig = plt.figure(figsize=(16, 8), dpi=100)
+        """Setup the main figure with improved layout"""
+        # Create figure with optimal size and DPI
+        self.fig = plt.figure(figsize=(18, 10), dpi=100)
         self.fig.suptitle('KMCView - Enhanced Molecular Evolution Viewer', 
-                         fontsize=14, fontweight='bold', color=self.colors['text'])
+                         fontsize=16, fontweight='bold', color=self.colors['text'])
         
-        # Mini charts on the left side
-        # Surface coverage chart
-        self.coverage_ax = plt.axes([0.07, 0.55, 0.20, 0.35])
-        self.coverage_ax.set_facecolor(self.colors['panel'])
-        self.coverage_ax.set_title('Surface Coverage', fontsize=10, color=self.colors['text'], pad=5)
-        
-        # Current coverage chart (pie chart)
-        self.coverage_pie_ax = plt.axes([0.07, 0.25, 0.20, 0.25])
-        self.coverage_pie_ax.set_facecolor(self.colors['panel'])
-        self.coverage_pie_ax.set_title('Current Coverage', fontsize=10, color=self.colors['text'], pad=5)
-        
-        # Main plot area (moved to the right)
-        self.ax = plt.axes([0.25, 0.30, 0.45, 0.60])
+        # Main plot area (slightly larger)
+        self.ax = plt.axes([0.05, 0.25, 0.68, 0.65])
         self.ax.set_facecolor(self.colors['bg'])
         
         # Performance monitor (top right, smaller)
-        self.perf_ax = plt.axes([0.72, 0.88, 0.25, 0.08])
+        self.perf_ax = plt.axes([0.76, 0.88, 0.22, 0.08])
         self.perf_ax.set_facecolor(self.colors['panel'])
-        self.perf_text = self.perf_ax.text(0.05, 0.5, 'Ready', 
+        self.perf_text = self.perf_ax.text(0.05, 0.5, 'Performance: Ready', 
                                           transform=self.perf_ax.transAxes,
-                                          fontsize=7, color=self.colors['text'],
-                                          verticalalignment='center')
+                                          fontsize=9, color=self.colors['text'])
         self.perf_ax.set_xticks([])
         self.perf_ax.set_yticks([])
         
-        # Expanded info panel (right side, adjusted)
-        self.info_ax = plt.axes([0.72, 0.28, 0.25, 0.55])
+        # Expanded info panel (right side, much larger)
+        self.info_ax = plt.axes([0.76, 0.25, 0.22, 0.6])
         self.info_ax.set_facecolor(self.colors['panel'])
         self.info_text = self.info_ax.text(0.05, 0.98, 'Loading...', 
                                           transform=self.info_ax.transAxes,
-                                          fontsize=9, color=self.colors['text'],
+                                          fontsize=10, color=self.colors['text'],
                                           verticalalignment='top', fontfamily='monospace')
         self.info_ax.set_xticks([])
         self.info_ax.set_yticks([])
-        self.info_ax.set_title('Simulation Info', fontsize=11, color=self.colors['text'], pad=8)
+        self.info_ax.set_title('Simulation Info', fontsize=12, color=self.colors['text'], pad=10)
         
         # Status bar (bottom)
-        self.status_ax = plt.axes([0.08, 0.02, 0.89, 0.05])
+        self.status_ax = plt.axes([0.05, 0.02, 0.9, 0.05])
         self.status_ax.set_facecolor(self.colors['panel'])
         self.status_text = self.status_ax.text(0.01, 0.5, 'Ready', 
                                               transform=self.status_ax.transAxes,
-                                              fontsize=9, color=self.colors['success'],
+                                              fontsize=10, color=self.colors['success'],
                                               verticalalignment='center')
         self.status_ax.set_xticks([])
         self.status_ax.set_yticks([])
     
-    def calculate_surface_coverage(self, step):
-        """Calculate surface coverage for a given step"""
-        if step >= len(self.evolution_df):
-            return 0.0
-        
-        current_data = self.evolution_df.iloc[step]
-        total_sites = len(self.coordinates)
-        
-        if total_sites == 0:
-            return 0.0
-        
-        # Calculate total occupied sites
-        occupied_sites = 0
-        for species in ['H*', 'GeH2*', 'GeH3*']:
-            occupied_sites += int(current_data.get(species, 0))
-        
-        return occupied_sites / total_sites * 100  # Return as percentage
-
-    def update_mini_charts(self, step):
-        """Update all mini charts with current step data"""
-        # Update surface coverage chart
-        self.update_coverage_chart(step)
-        
-        # Update current coverage pie chart
-        self.update_coverage_pie_chart(step)
-    
-    def update_coverage_chart(self, step):
-        """Update surface coverage chart"""
-        self.coverage_ax.clear()
-        self.coverage_ax.set_facecolor(self.colors['panel'])
-        
-        # Calculate coverage for all steps up to current
-        steps = list(range(min(step + 1, len(self.evolution_df))))
-        coverages = [self.calculate_surface_coverage(s) for s in steps]
-        times = [self.evolution_df.iloc[s]['time'] for s in steps]
-        
-        # Plot coverage evolution
-        self.coverage_ax.plot(times, coverages, color=self.colors['accent'], linewidth=2)
-        
-        # Add current point highlight
-        if step < len(self.evolution_df):
-            current_time = self.evolution_df.iloc[step]['time']
-            current_coverage = coverages[-1]
-            self.coverage_ax.scatter([current_time], [current_coverage], 
-                                   color=self.colors['success'], s=50, zorder=5)
-        
-        # Formatting
-        self.coverage_ax.set_xlabel('Time', fontsize=8, color=self.colors['text'])
-        self.coverage_ax.set_ylabel('Coverage (%)', fontsize=8, color=self.colors['text'])
-        self.coverage_ax.tick_params(axis='both', which='major', labelsize=7, colors=self.colors['text'])
-        self.coverage_ax.grid(True, alpha=0.3)
-        self.coverage_ax.set_title('Surface Coverage', fontsize=10, color=self.colors['text'], pad=5)
-    
-    def update_coverage_pie_chart(self, step):
-        """Update current coverage pie chart for the given step"""
-        self.coverage_pie_ax.clear()
-        self.coverage_pie_ax.set_facecolor(self.colors['panel'])
-        
-        # Get current step data
-        if step < len(self.evolution_df):
-            current_data = self.evolution_df.iloc[step]
-            
-            # Calculate current species counts
-            h_current = int(current_data.get('H*', 0))
-            geh2_current = int(current_data.get('GeH2*', 0))
-            geh3_current = int(current_data.get('GeH3*', 0))
-            empty_current = len(self.coordinates) - h_current - geh2_current - geh3_current
-            
-            # Create pie chart
-            sizes = [h_current, geh2_current, geh3_current, empty_current]
-            labels = ['H*', 'GeH2*', 'GeH3*', 'Empty']
-            colors = ['#FF4444', '#4477FF', '#44AA44', '#CCCCCC']
-            
-            # Only show non-zero slices
-            non_zero_data = [(s, l, c) for s, l, c in zip(sizes, labels, colors) if s > 0]
-            if non_zero_data:
-                sizes, labels, colors = zip(*non_zero_data)
-                self.coverage_pie_ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', 
-                                       startangle=90, textprops={'fontsize': 7})
-        
-        # self.coverage_pie_ax.set_title('Current Coverage', fontsize=10, color=self.colors['text'], pad=5)
-    
     def setup_controls(self):
-        """Setup enhanced control widgets with cleaner layout and better spacing"""
-        # Main slider (adjusted for better alignment with buttons)
-        ax_slider = plt.axes([0.14, 0.18, 0.50, 0.03])
+        """Setup enhanced control widgets with cleaner layout"""
+        # Main slider (wider, better positioned)
+        ax_slider = plt.axes([0.1, 0.15, 0.5, 0.03])
         self.slider = Slider(ax_slider, 'Time Step', 0, max(0, len(self.evolution_df) - 1), 
                            valinit=0, valfmt='%d', color=self.colors['accent'])
         self.slider.on_changed(self.on_slider_change)
         
-        # Speed control (moved much further right to avoid text collision)
-        ax_speed = plt.axes([0.75, 0.18, 0.08, 0.03])
+        # Speed control
+        ax_speed = plt.axes([0.65, 0.15, 0.1, 0.03])
         self.speed_slider = Slider(ax_speed, 'Speed', 0.1, 5.0, valinit=1.0, 
                                  valfmt='%.1fx', color=self.colors['warning'])
         self.speed_slider.on_changed(self.on_speed_change)
         
-        # Button row with much more aggressive spacing
-        button_width = 0.060  # Slightly smaller for better fit
-        button_height = 0.04
-        button_spacing = 0.035  # Much more spacing for better visual separation
-        start_x = 0.08  # Start position
-        
         # Play button
-        ax_play = plt.axes([start_x, 0.10, button_width, button_height])
+        ax_play = plt.axes([0.1, 0.1, 0.07, 0.04])
         self.play_button = Button(ax_play, 'Play', color=self.colors['success'])
         self.play_button.on_clicked(self.toggle_play)
         
         # Reset button
-        ax_reset = plt.axes([start_x + button_width + button_spacing, 0.10, button_width, button_height])
+        ax_reset = plt.axes([0.18, 0.1, 0.07, 0.04])
         self.reset_button = Button(ax_reset, 'Reset', color=self.colors['danger'])
         self.reset_button.on_clicked(self.reset_animation)
         
-        # Step buttons with better spacing and symbols
-        step_button_width = button_width * 0.70  # Smaller for step buttons
-        ax_prev = plt.axes([start_x + 2 * (button_width + button_spacing), 0.10, step_button_width, button_height])
-        self.prev_button = Button(ax_prev, '◀', color=self.colors['accent'])
+        # Step buttons
+        ax_prev = plt.axes([0.26, 0.1, 0.05, 0.04])
+        self.prev_button = Button(ax_prev, '<<', color=self.colors['accent'])
         self.prev_button.on_clicked(self.prev_step)
         
-        ax_next = plt.axes([start_x + 2 * (button_width + button_spacing) + step_button_width + button_spacing, 0.10, step_button_width, button_height])
-        self.next_button = Button(ax_next, '▶', color=self.colors['accent'])
+        ax_next = plt.axes([0.32, 0.1, 0.05, 0.04])
+        self.next_button = Button(ax_next, '>>', color=self.colors['accent'])
         self.next_button.on_clicked(self.next_step)
         
-        # Text input with much wider spacing
-        text_input_width = button_width * 1.5
-        ax_text = plt.axes([start_x + 2 * (button_width + button_spacing) + 2 * step_button_width + button_spacing * 2, 0.10, text_input_width, button_height])
+        # Text input
+        ax_text = plt.axes([0.39, 0.1, 0.09, 0.04])
         self.text_box = TextBox(ax_text, 'Step:', initial='0', color=self.colors['panel'])
         self.text_box.on_submit(self.on_text_submit)
         
-        # Settings button
-        settings_width = button_width * 1.2
-        ax_settings = plt.axes([start_x + 2 * (button_width + button_spacing) + 2 * step_button_width + text_input_width + button_spacing * 3, 0.10, settings_width, button_height])
+        # Export button
+        ax_export = plt.axes([0.50, 0.1, 0.07, 0.04])
+        self.export_button = Button(ax_export, 'Save', color=self.colors['warning'])
+        self.export_button.on_clicked(self.export_frame)
+        
+        # Settings button (opens modal)
+        ax_settings = plt.axes([0.59, 0.1, 0.08, 0.04])
         self.settings_button = Button(ax_settings, 'Settings', color=self.colors['accent'])
         self.settings_button.on_clicked(self.open_settings_modal)
     
@@ -740,6 +656,8 @@ class EnhancedMolecularViewer:
                 self.prev_step(None)
             elif event.key == 'right':  # Right arrow
                 self.next_step(None)
+            elif event.key == 's':  # S key
+                self.export_frame(None)
             elif event.key == 'o':  # O key for settings (Options)
                 self.open_settings_modal(None)
             elif event.key == 'q':  # Q key
@@ -771,14 +689,10 @@ class EnhancedMolecularViewer:
         avg_render_time = np.mean(self.render_times) * 1000  # Convert to ms
         fps = 1.0 / render_time if render_time > 0 else float('inf')
         
-        # Use ultra-compact format to prevent text overflow
-        self.perf_text.set_text(f'{render_time*1000:.0f}ms {fps:.0f}fps')
+        self.perf_text.set_text(f'Render: {render_time*1000:.1f}ms\nAvg: {avg_render_time:.1f}ms\nFPS: {fps:.1f}')
         
         # Update info panel
         self.update_info_panel(step)
-        
-        # Update mini charts
-        self.update_mini_charts(step)
         
         # Update status
         self.status_text.set_text(f'Step {step+1}/{len(self.evolution_df)} rendered')
@@ -951,19 +865,19 @@ class EnhancedMolecularViewer:
                 actual_kmc_step = self.step_to_config[step]
             
             if actual_kmc_step is not None and actual_kmc_step in self.lattice_states:
-                data_source_info = "[OK] History Data (Exact)"
+                data_source_info = "✅ History Data (Exact)"
                 self.info_text.set_color(self.colors['success'])
             else:
-                data_source_info = "[ERROR] Data Missing"
+                data_source_info = "❌ Data Missing"
                 self.info_text.set_color(self.colors['danger'])
         else:
-            data_source_info = "[WARN] Approximated (No History)"
+            data_source_info = "⚠️ Approximated (No History)"
             self.info_text.set_color(self.colors['warning'])
         
         # Generate visibility indicators
         visibility_info = []
         for species in ['H*', 'GeH2*', 'GeH3*']:
-            status = "VISIBLE" if self.species_properties.get(species, {}).get('visible', True) else "HIDDEN"
+            status = "👁" if self.species_properties.get(species, {}).get('visible', True) else "🚫"
             visibility_info.append(f"{status} {species}")
         
         info_text = f"""SIMULATION STATUS
@@ -1129,7 +1043,15 @@ Trails: {'ON' if self.show_trajectories else 'OFF'}"""
         self.frame_cache.clear()
         self.update_plot(self.current_step, force_redraw=True)
     
-
+    def on_theme_change(self, label):
+        """Handle theme changes"""
+        new_theme = 'dark' if label == 'Dark' else 'light'
+        if new_theme != self.theme:
+            self.theme = new_theme
+            self.setup_theme()
+            self.frame_cache.clear()  # Clear cache due to theme change
+            self.update_plot(self.current_step, force_redraw=True)
+            self.status_text.set_text(f'Switched to {new_theme} theme')
     
     def toggle_play(self, event):
         """Enhanced play/pause with better feedback"""
@@ -1178,7 +1100,72 @@ Trails: {'ON' if self.show_trajectories else 'OFF'}"""
             self.update_plot(self.current_step)
             self.text_box.set_val(str(self.current_step))
     
-
+    def export_frame(self, event):
+        """Export current frame with enhanced options"""
+        try:
+            filename = f"kmcview_frame_step_{self.current_step:04d}.{self.export_format}"
+            
+            # Create a clean figure for export
+            export_fig, export_ax = plt.subplots(figsize=(12, 10), dpi=300)
+            
+            # Render the current frame on the export figure
+            current_data = self.evolution_df.iloc[self.current_step]
+            positions = self.generate_positions_for_step(self.current_step)
+            
+            # Draw everything on export figure
+            if self.show_lattice_grid:
+                cell_size_x = self.lattice_bounds['cell_size_x']
+                cell_size_y = self.lattice_bounds['cell_size_y']
+                repeat_x = int(self.lattice_bounds['x_max'] / cell_size_x)
+                repeat_y = int(self.lattice_bounds['y_max'] / cell_size_y)
+                
+                for i in range(repeat_x + 1):
+                    x_line = i * cell_size_x
+                    if x_line <= self.lattice_bounds['x_max']:
+                        export_ax.axvline(x=x_line, color='gray', alpha=0.3, linewidth=0.5)
+                
+                for j in range(repeat_y + 1):
+                    y_line = j * cell_size_y
+                    if y_line <= self.lattice_bounds['y_max']:
+                        export_ax.axhline(y=y_line, color='gray', alpha=0.3, linewidth=0.5)
+            
+            # Draw molecules
+            colors = {'H*': '#FF4444', 'GeH2*': '#4477FF', 'GeH3*': '#44AA44'}
+            sizes = {'H*': 40, 'GeH2*': 80, 'GeH3*': 120}
+            
+            for species, coords in positions.items():
+                if coords:
+                    x_coords = [c['x'] for c in coords]
+                    y_coords = [c['y'] for c in coords]
+                    export_ax.scatter(x_coords, y_coords, 
+                                    c=colors[species], s=sizes[species], 
+                                    alpha=0.8, label=f'{species} ({len(coords)})',
+                                    edgecolors='black', linewidth=0.5)
+            
+            # Configure export axes
+            export_ax.set_xlim(self.lattice_bounds['x_min'], self.lattice_bounds['x_max'])
+            export_ax.set_ylim(self.lattice_bounds['y_min'], self.lattice_bounds['y_max'])
+            export_ax.set_xlabel('X Coordinate (Å)', fontsize=14)
+            export_ax.set_ylabel('Y Coordinate (Å)', fontsize=14)
+            export_ax.set_aspect('equal')
+            export_ax.grid(True, alpha=0.3)
+            export_ax.legend()
+            
+            current_time = current_data['time']
+            export_ax.set_title(f'KMC Molecular Evolution - Step {self.current_step+1} (t={current_time:.2f})', 
+                              fontsize=16, pad=20)
+            
+            # Save with high quality
+            export_fig.savefig(filename, dpi=300, bbox_inches='tight', 
+                             facecolor='white', edgecolor='none')
+            plt.close(export_fig)
+            
+            self.status_text.set_text(f'Saved {filename}')
+            print(f"Exported frame to {filename}")
+            
+        except Exception as e:
+            self.status_text.set_text(f'Export failed: {str(e)[:50]}')
+            print(f"Export failed: {e}")
     
     def on_text_submit(self, text):
         """Enhanced text input with validation"""
@@ -1202,308 +1189,194 @@ Trails: {'ON' if self.show_trajectories else 'OFF'}"""
         return []
 
     def open_settings_modal(self, event):
-        """Open settings modal with native table widget and clean layout"""
+        """Open settings modal window with species data grid"""
         if self.settings_open:
             return
             
         self.settings_open = True
         
-        # Create figure with smaller, more reasonable size
-        self.settings_fig = plt.figure(figsize=(10, 6), dpi=100)
-        self.settings_fig.suptitle('Display Settings', fontsize=12, fontweight='bold', color=self.colors['text'])
+        # Create a new figure for settings
+        self.settings_fig = plt.figure(figsize=(10, 12), dpi=100)
+        self.settings_fig.suptitle('Display Settings', fontsize=14, fontweight='bold')
         
-        # Apply theme to settings figure
-        self.settings_fig.patch.set_facecolor(self.colors['bg'])
+        # Theme selector
+        theme_ax = plt.axes([0.1, 0.85, 0.8, 0.1])
+        theme_labels = ['Dark', 'Light']
+        theme_active = 0 if self.theme == 'dark' else 1
+        self.settings_theme_radio = RadioButtons(theme_ax, theme_labels, active=theme_active)
+        self.settings_theme_radio.on_clicked(self.on_settings_theme_change)
+        theme_ax.set_title('Theme', fontsize=12, pad=15)
         
-        # Use subplot2grid for better layout control with more compact spacing
-        options_ax = plt.subplot2grid((4, 3), (0, 0), colspan=2, fig=self.settings_fig)
-        table_ax = plt.subplot2grid((4, 3), (1, 0), colspan=3, rowspan=2, fig=self.settings_fig)
-        buttons_ax = plt.subplot2grid((4, 3), (3, 0), colspan=3, fig=self.settings_fig)
-        
-        # Apply theme colors to all axes
-        for ax in [options_ax, table_ax, buttons_ax]:
-            ax.set_facecolor(self.colors['panel'])
-        
-        # Setup each section
-        self.setup_display_options(options_ax)
-        self.setup_species_table(table_ax)
-        self.setup_control_buttons(buttons_ax)
-        
-        # Handle window close event
-        self.settings_fig.canvas.mpl_connect('close_event', self.on_settings_window_close)
-        self.settings_fig.canvas.mpl_connect('button_press_event', self.on_table_click)
-        
-        plt.tight_layout(pad=2.5)  # Even more padding to prevent collisions
-        plt.show()
-    
-
-    
-    def setup_display_options(self, ax):
-        """Setup display options controls"""
+        # Display options
+        options_ax = plt.axes([0.1, 0.7, 0.8, 0.12])
         options_labels = ['Lattice Grid', 'Empty Sites', 'Trajectories']
         options_states = [self.show_lattice_grid, self.show_empty_sites, self.show_trajectories]
-        self.settings_options_check = CheckButtons(ax, options_labels, options_states)
+        self.settings_options_check = CheckButtons(options_ax, options_labels, options_states)
         self.settings_options_check.on_clicked(self.on_settings_options_change)
+        options_ax.set_title('Display Options', fontsize=12, pad=15)
         
-        # Apply theme colors to checkboxes
-        ax.set_title('Display Options', fontsize=11, pad=10, color=self.colors['text'])
+        # Species Properties Data Grid
+        self.setup_species_data_grid()
         
-        # Style checkboxes for better visibility in dark mode
-        try:
-            # Try to access rectangles if they exist
-            if hasattr(self.settings_options_check, 'rectangles'):
-                for rect in self.settings_options_check.rectangles:
-                    rect.set_edgecolor(self.colors['text'])
-                    rect.set_linewidth(1.5)
-                    if rect.get_facecolor()[0] > 0.5:  # If checked (white background)
-                        rect.set_facecolor(self.colors['accent'])
-                    else:  # If unchecked (transparent)
-                        rect.set_facecolor('none')
-        except:
-            pass  # If rectangles don't exist, skip styling
+        # Control buttons
+        button_y = 0.08
+        button_width = 0.15
+        button_height = 0.06
         
-        # Style labels
-        try:
-            if hasattr(self.settings_options_check, 'labels'):
-                for label in self.settings_options_check.labels:
-                    label.set_color(self.colors['text'])
-        except:
-            pass  # If labels don't exist, skip styling
-    
-    def setup_species_table(self, ax):
-        """Setup species properties table using matplotlib's native table widget"""
-        # Prepare table data
-        species_data = []
-        for species, props in self.species_properties.items():
-            species_data.append([
-                species,
-                'ON' if props['visible'] else 'OFF',
-                props['color'],
-                self.get_shape_display_name(props['shape']),
-                str(props['size'])
-            ])
-        
-        # Create native matplotlib table
-        self.species_table = ax.table(
-            cellText=species_data,
-            colLabels=['Species', 'Visible', 'Color', 'Shape', 'Size'],
-            cellLoc='center',
-            loc='center',
-            colWidths=[0.2, 0.15, 0.25, 0.2, 0.2]
-        )
-        
-        # Style the table
-        self.species_table.auto_set_font_size(False)
-        self.species_table.set_fontsize(8)  # Even smaller font to prevent text overflow
-        self.species_table.scale(1, 2.8)  # Even taller rows for better text spacing
-        
-        # Color the header row
-        for i in range(5):  # 5 columns
-            self.species_table[(0, i)].set_facecolor(self.colors['accent'])
-            self.species_table[(0, i)].set_text_props(weight='bold', color='white')
-        
-        # Color the color column cells with their actual colors
-        for row in range(1, len(species_data) + 1):
-            color = species_data[row-1][2]  # Color column
-            try:
-                self.species_table[(row, 2)].set_facecolor(color)
-                # Set text color based on background brightness
-                self.species_table[(row, 2)].set_text_props(color='white' if self.is_dark_color(color) else 'black')
-            except:
-                pass  # Invalid color format
-        
-        ax.set_title('Species Properties (Click cells to edit)', fontsize=11, pad=15, color=self.colors['text'])  # Smaller title and padding
-        ax.axis('off')
-    
-    def setup_control_buttons(self, ax):
-        """Setup control buttons in a clean layout"""
-        ax.axis('off')
-        
-        # Create buttons within the subplot axes for proper layout integration
-        button_width = 0.25
-        button_height = 0.6
-        button_spacing = 0.05
-        
-        # Calculate button positions within the subplot
-        total_width = 3 * button_width + 2 * button_spacing
-        start_x = (1.0 - total_width) / 2
-        
-        # Create button axes within the subplot
-        reset_ax = ax.figure.add_axes([ax.get_position().x0 + start_x * ax.get_position().width, 
-                                      ax.get_position().y0 + 0.2 * ax.get_position().height,
-                                      button_width * ax.get_position().width, 
-                                      button_height * ax.get_position().height])
-        self.settings_reset_button = Button(reset_ax, 'Reset Defaults', color=self.colors['danger'])
+        # Reset button
+        reset_ax = plt.axes([0.1, button_y, button_width, button_height])
+        self.settings_reset_button = Button(reset_ax, 'Reset Defaults', color='lightcoral')
         self.settings_reset_button.on_clicked(self.reset_species_defaults)
         
-        # Apply button  
-        apply_ax = ax.figure.add_axes([ax.get_position().x0 + (start_x + button_width + button_spacing) * ax.get_position().width,
-                                      ax.get_position().y0 + 0.2 * ax.get_position().height,
-                                      button_width * ax.get_position().width, 
-                                      button_height * ax.get_position().height])
-        self.settings_apply_button = Button(apply_ax, 'Apply Changes', color=self.colors['success'])
+        # Apply button
+        apply_ax = plt.axes([0.3, button_y, button_width, button_height])
+        self.settings_apply_button = Button(apply_ax, 'Apply Changes', color='lightgreen')
         self.settings_apply_button.on_clicked(self.apply_species_changes)
         
         # Close button
-        close_ax = ax.figure.add_axes([ax.get_position().x0 + (start_x + 2 * (button_width + button_spacing)) * ax.get_position().width,
-                                      ax.get_position().y0 + 0.2 * ax.get_position().height,
-                                      button_width * ax.get_position().width, 
-                                      button_height * ax.get_position().height])
-        self.settings_close_button = Button(close_ax, 'Close', color=self.colors['accent'])
+        close_ax = plt.axes([0.5, button_y, button_width, button_height])
+        self.settings_close_button = Button(close_ax, 'Close', color='lightgray')
         self.settings_close_button.on_clicked(self.close_settings_modal)
+        
+        # Handle window close event
+        self.settings_fig.canvas.mpl_connect('close_event', self.on_settings_window_close)
+        
+        plt.show()
     
-    def get_shape_display_name(self, shape):
-        """Get display name for shape"""
-        shape_names = {
-            'o': 'Circle', 's': 'Square', '^': 'Triangle', 'D': 'Diamond',
-            'v': 'Down△', '<': 'Left△', '>': 'Right△', 'p': 'Pentagon', 
-            '*': 'Star', 'h': 'Hexagon'
-        }
-        return f'{shape} ({shape_names.get(shape, shape)})'
-    
-    def is_dark_color(self, color):
-        """Check if a color is dark (for text color selection)"""
-        try:
-            # Simple brightness check
-            if color.startswith('#'):
-                r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
-                brightness = (r * 299 + g * 587 + b * 114) / 1000
-                return brightness < 128
-        except:
-            pass
-        return False
-    
-    def on_table_click(self, event):
-        """Handle table cell clicks for editing"""
-        if not hasattr(self, 'species_table'):
-            return
+    def setup_species_data_grid(self):
+        """Setup the species properties data grid"""
+        # Main grid area
+        grid_ax = plt.axes([0.05, 0.2, 0.9, 0.45])
+        grid_ax.set_xlim(0, 10)
+        grid_ax.set_ylim(0, len(self.species_properties) + 1)
+        grid_ax.set_aspect('equal')
+        
+        # Headers
+        headers = ['Species', 'Visible', 'Color', 'Shape', 'Size']
+        header_positions = [1, 3, 5, 7, 9]
+        
+        for i, header in enumerate(headers):
+            grid_ax.text(header_positions[i], len(self.species_properties) + 0.5, header, 
+                        ha='center', va='center', fontweight='bold', fontsize=11)
+        
+        # Grid lines
+        for i in range(len(self.species_properties) + 2):
+            grid_ax.axhline(y=i-0.5, color='gray', linestyle='-', alpha=0.3)
+        for i in range(len(header_positions) + 1):
+            grid_ax.axvline(x=i*2-0.5, color='gray', linestyle='-', alpha=0.3)
+        
+        # Species data grid controls
+        self.species_controls = {}
+        
+        for row, (species, props) in enumerate(self.species_properties.items()):
+            y_pos = len(self.species_properties) - row - 0.5
             
-        # Find which cell was clicked
-        for (row, col), cell in self.species_table.get_celld().items():
-            if row == 0:  # Skip header row
-                continue
-                
-            if cell.contains(event)[0]:
-                species_list = list(self.species_properties.keys())
-                if row - 1 < len(species_list):
-                    species = species_list[row - 1]
-                    self.edit_table_cell(row, col, species)
-                break
+            # Species name (read-only)
+            grid_ax.text(1, y_pos, species, ha='center', va='center', fontsize=10)
+            
+            # Visibility checkbox
+            vis_ax = plt.axes([0.25, 0.2 + (y_pos-0.25)/len(self.species_properties)*0.45, 0.08, 0.04])
+            vis_check = CheckButtons(vis_ax, [''], [props['visible']])
+            vis_check.on_clicked(lambda label, s=species: self.on_species_visibility_change(s))
+            
+            # Color picker (simplified as text input)
+            color_ax = plt.axes([0.45, 0.2 + (y_pos-0.25)/len(self.species_properties)*0.45, 0.12, 0.04])
+            color_text = TextBox(color_ax, '', initial=props['color'])
+            color_text.on_submit(lambda text, s=species: self.on_species_color_change(s, text))
+            
+            # Shape selector (cycle through options)
+            shape_ax = plt.axes([0.65, 0.2 + (y_pos-0.25)/len(self.species_properties)*0.45, 0.08, 0.04])
+            shape_button = Button(shape_ax, props['shape'], color='lightblue')
+            shape_button.on_clicked(lambda event, s=species: self.cycle_species_shape(s))
+            
+            # Size input
+            size_ax = plt.axes([0.8, 0.2 + (y_pos-0.25)/len(self.species_properties)*0.45, 0.1, 0.04])
+            size_text = TextBox(size_ax, '', initial=str(props['size']))
+            size_text.on_submit(lambda text, s=species: self.on_species_size_change(s, text))
+            
+            # Store controls for later reference
+            self.species_controls[species] = {
+                'visibility': vis_check,
+                'color': color_text,
+                'shape': shape_button,
+                'size': size_text
+            }
+        
+        grid_ax.set_xticks([])
+        grid_ax.set_yticks([])
+        grid_ax.set_title('Species Properties', fontsize=12, pad=20)
     
-    def edit_table_cell(self, row, col, species):
-        """Edit a specific table cell based on column"""
-        if col == 1:  # Visibility column
-            self.toggle_species_visibility(species, row, col)
-        elif col == 2:  # Color column
-            self.cycle_species_color(species, row, col)
-        elif col == 3:  # Shape column
-            self.cycle_species_shape_simple(species, row, col)
-        elif col == 4:  # Size column
-            self.cycle_species_size(species, row, col)
-    
-    def toggle_species_visibility(self, species, row, col):
-        """Toggle species visibility and update table"""
+    def on_species_visibility_change(self, species):
+        """Callback for visibility checkbox changes in settings modal"""
         self.species_properties[species]['visible'] = not self.species_properties[species]['visible']
-        
-        # Update table cell
-        new_text = 'ON' if self.species_properties[species]['visible'] else 'OFF'
-        self.species_table[(row, col)].get_text().set_text(new_text)
-        
-        # Update visualization
         self.frame_cache.clear()
         self.update_plot(self.current_step, force_redraw=True)
         
-        # Update status
+        # Update status with visible species list
         visible_species = [s for s, props in self.species_properties.items() if props['visible']]
         self.status_text.set_text(f'Visible species: {", ".join(visible_species)}')
-        
-        plt.draw()
     
-    def cycle_species_color(self, species, row, col):
-        """Cycle through predefined colors"""
-        colors = ['#FF4444', '#4477FF', '#44AA44', '#FFAA44', '#AA44FF', '#44AAFF', '#FF44AA', '#AAFF44']
-        current_color = self.species_properties[species]['color']
-        
+    def on_species_color_change(self, species, text):
+        """Callback for color text input changes in settings modal"""
         try:
-            current_idx = colors.index(current_color)
-        except ValueError:
-            current_idx = 0
-        
-        new_idx = (current_idx + 1) % len(colors)
-        new_color = colors[new_idx]
-        
-        self.species_properties[species]['color'] = new_color
-        
-        # Update table cell
-        self.species_table[(row, col)].get_text().set_text(new_color)
-        self.species_table[(row, col)].set_facecolor(new_color)
-        self.species_table[(row, col)].set_text_props(color='white' if self.is_dark_color(new_color) else 'black')
-        
-        # Update visualization
-        self.frame_cache.clear()
-        self.update_plot(self.current_step, force_redraw=True)
-        self.status_text.set_text(f'Color updated for {species}: {new_color}')
-        
-        plt.draw()
+            # Clean the input text
+            color_input = text.strip()
+            
+            # Handle different color formats
+            if color_input.startswith('#') and len(color_input) == 7:
+                # Already in hex format
+                self.species_properties[species]['color'] = color_input
+            elif len(color_input) == 6 and all(c in '0123456789abcdefABCDEF' for c in color_input):
+                # Hex without #
+                self.species_properties[species]['color'] = '#' + color_input
+            else:
+                self.status_text.set_text(f'Invalid color format for {species}. Use #RRGGBB or RRGGBB')
+                return
+                
+            self.frame_cache.clear()
+            self.update_plot(self.current_step, force_redraw=True)
+            self.status_text.set_text(f'Color updated for {species}: {self.species_properties[species]["color"]}')
+            
+        except Exception as e:
+            self.status_text.set_text(f'Error setting color for {species}: {e}')
     
-    def cycle_species_shape_simple(self, species, row, col):
-        """Cycle through available shapes"""
-        shapes = ['o', 's', '^', 'D', 'v', '<', '>', 'p', '*', 'h']
+    def cycle_species_shape(self, species):
+        """Callback for shape button changes in settings modal"""
+        shape_names = {'o': 'Circle', 's': 'Square', '^': 'Triangle'}
+        shapes = ['o', 's', '^']
+        
         current_shape = self.species_properties[species]['shape']
-        
-        try:
-            current_idx = shapes.index(current_shape)
-        except ValueError:
-            current_idx = 0
-        
-        new_idx = (current_idx + 1) % len(shapes)
-        new_shape = shapes[new_idx]
+        current_index = shapes.index(current_shape) if current_shape in shapes else 0
+        new_index = (current_index + 1) % len(shapes)
+        new_shape = shapes[new_index]
         
         self.species_properties[species]['shape'] = new_shape
         
-        # Update table cell
-        self.species_table[(row, col)].get_text().set_text(self.get_shape_display_name(new_shape))
+        # Update the button text
+        self.species_controls[species]['shape'].label.set_text(new_shape)
         
-        # Update visualization
         self.frame_cache.clear()
         self.update_plot(self.current_step, force_redraw=True)
-        self.status_text.set_text(f'Shape updated for {species}: {new_shape}')
-        
-        plt.draw()
+        self.status_text.set_text(f'Shape updated for {species}: {shape_names.get(new_shape, new_shape)}')
     
-    def cycle_species_size(self, species, row, col):
-        """Cycle through common sizes"""
-        sizes = [20, 40, 60, 80, 100, 120, 150, 200]
-        current_size = self.species_properties[species]['size']
-        
+    def on_species_size_change(self, species, text):
+        """Callback for size text input changes in settings modal"""
         try:
-            current_idx = sizes.index(current_size)
+            size = int(text.strip())
+            if size <= 0:
+                self.status_text.set_text(f'Size must be positive for {species}')
+                return
+            if size > 500:
+                self.status_text.set_text(f'Size too large for {species} (max 500)')
+                return
+                
+            self.species_properties[species]['size'] = size
+            self.frame_cache.clear()
+            self.update_plot(self.current_step, force_redraw=True)
+            self.status_text.set_text(f'Size updated for {species}: {size}')
+            
         except ValueError:
-            current_idx = 1  # Default to 40
-        
-        new_idx = (current_idx + 1) % len(sizes)
-        new_size = sizes[new_idx]
-        
-        self.species_properties[species]['size'] = new_size
-        
-        # Update table cell
-        self.species_table[(row, col)].get_text().set_text(str(new_size))
-        
-        # Update visualization
-        self.frame_cache.clear()
-        self.update_plot(self.current_step, force_redraw=True)
-        self.status_text.set_text(f'Size updated for {species}: {new_size}')
-        
-        plt.draw()
-    
-    def on_species_visibility_change(self, species):
-        """Legacy callback - functionality moved to table clicks"""
-        pass
-    
-    def refresh_table(self):
-        """Refresh the table display after changes"""
-        if hasattr(self, 'species_table'):
-            plt.draw()
+            self.status_text.set_text(f'Invalid size for {species}. Enter a number.')
     
     def reset_species_defaults(self, event):
         """Callback for resetting species properties to defaults"""
@@ -1547,7 +1420,15 @@ Trails: {'ON' if self.show_trajectories else 'OFF'}"""
         """Handle settings window close event"""
         self.settings_open = False
     
-
+    def on_settings_theme_change(self, label):
+        """Handle theme changes from settings modal"""
+        new_theme = 'dark' if label == 'Dark' else 'light'
+        if new_theme != self.theme:
+            self.theme = new_theme
+            self.setup_theme()
+            self.frame_cache.clear()
+            self.update_plot(self.current_step, force_redraw=True)
+            self.status_text.set_text(f'Switched to {new_theme} theme')
     
     def on_settings_options_change(self, label):
         """Handle display options changes from settings modal"""
@@ -1583,15 +1464,17 @@ def main():
     parser = argparse.ArgumentParser(description='KMCView - Enhanced Molecular Evolution Viewer')
     parser.add_argument('--data-dir', '-d', default='input-output', 
                        help='Directory containing KMC output files')
-
+    parser.add_argument('--theme', '-t', choices=['dark', 'light'], default='dark',
+                       help='UI theme (dark or light)')
     
     args = parser.parse_args()
     
     print(ascii_art)
     print(f"🚀 Starting KMCView - Enhanced Molecular Viewer")
     print(f"📁 Data directory: {args.data_dir}")
+    print(f"🎨 Theme: {args.theme}")
     
-    viewer = EnhancedMolecularViewer(data_dir=args.data_dir)
+    viewer = EnhancedMolecularViewer(data_dir=args.data_dir, theme=args.theme)
 
 if __name__ == '__main__':
     main() 
