@@ -13,17 +13,18 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Dash](https://img.shields.io/badge/Dash-2.0+-green.svg)](https://dash.plotly.com/)
 [![Matplotlib](https://img.shields.io/badge/Matplotlib-3.5+-red.svg)](https://matplotlib.org/)
+
+> **Created through a collaboration between myself and  
+> [Vy Nguyen](https://www.researchgate.net/profile/Vy-Nguyen-154), PostDoc at Iowa State University.**
 
 ## 🎯 Overview
 
-This project provides two interactive visualization tools for analyzing kinetic Monte Carlo (KMC) simulation data:
+This project provides an interactive visualization tool for analyzing kinetic Monte Carlo (KMC) simulation data:
 
-1. **📊 Matplotlib Viewer** (`fixed_matplotlib_viewer.py`) - Desktop application with animation controls
-2. **🌐 Web Viewer** (`fixed_web_viewer.py`) - Browser-based interactive dashboard
+**📊 Enhanced GUI Viewer** (`enhanced_gui_viewer.py`) - Desktop application with modern interface
 
-Both viewers feature:
+The viewer features:
 - ✅ **Dynamic lattice parsing** from `lattice_input.dat`
 - ✅ **Real-time molecular evolution** visualization
 - ✅ **Working animation controls** (play/pause/reset)
@@ -45,11 +46,11 @@ Both viewers feature:
 - **Site Type Information**: Preserves and displays different site types (top1, bridge1, etc.)
 - **Color-Coded Species**: Distinct colors and sizes for different molecular species
 - **Real-Time Updates**: Smooth animation through simulation time steps
-- **Hover Information**: Detailed site and molecule information on hover (web viewer)
+- **Modern UI**: Dark/light themes with professional interface
 
 ### Technical Features
 - **Robust Error Handling**: Graceful fallbacks for missing or corrupted files
-- **Command Line Interface**: Configurable data directories and ports
+- **Command Line Interface**: Configurable data directories and themes
 - **Memory Efficient**: Optimized for large simulation datasets
 - **Professional UI**: Clean, modern interface with comprehensive controls
 
@@ -66,8 +67,7 @@ Both viewers feature:
 numpy>=1.21.0
 pandas>=1.3.0
 matplotlib>=3.5.0
-plotly>=5.0.0
-dash>=2.0.0
+scipy>=1.7.0
 ```
 
 See `requirements.txt` for complete dependency list.
@@ -76,7 +76,7 @@ See `requirements.txt` for complete dependency list.
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/kmcview.git
+git clone https://github.com/shahabafshar/kmcview.git
 cd kmcview
 ```
 
@@ -93,7 +93,7 @@ pip install -r requirements.txt
 
 ### 4. Verify Installation
 ```bash
-python test_enhanced_viewers.py
+python test_enhanced_gui.py
 ```
 
 ## 📁 Project Structure
@@ -114,7 +114,7 @@ kmcview/
 
 ## 🎮 Usage
 
-### Matplotlib Viewer (Desktop)
+### Enhanced GUI Viewer (Desktop)
 
 **Basic Usage:**
 ```bash
@@ -123,7 +123,12 @@ python enhanced_gui_viewer.py
 
 **Custom Data Directory:**
 ```bash
-python enhanced_gui_viewer.py /path/to/your/data
+python enhanced_gui_viewer.py --data-dir /path/to/your/data
+```
+
+**Custom Theme:**
+```bash
+python enhanced_gui_viewer.py --theme light
 ```
 
 **Features:**
@@ -132,24 +137,7 @@ python enhanced_gui_viewer.py /path/to/your/data
 - 📝 **Step Input**: Jump to specific time steps
 - 🔄 **Reset Button**: Return to simulation start
 - 🖱️ **Interactive Plot**: Zoom, pan, and explore the lattice
-
-### Web Viewer (Browser)
-
-**Basic Usage:**
-```bash
-python enhanced_gui_viewer.py
-# The GUI will open automatically
-```
-
-**Custom Configuration:**
-```bash
-python enhanced_gui_viewer.py --data-dir /path/to/data --theme light
-```
-
-**Features:**
-- 🖥️ **Desktop Application**: Native GUI with modern interface
 - 🎨 **Theme Support**: Dark and light themes
-- 🔄 **Real-Time Updates**: Live animation controls
 - ⌨️ **Keyboard Shortcuts**: Space=Play/Pause, R=Reset, ←/→=Step
 - 📊 **Interactive Controls**: Speed slider, step navigation
 - 💾 **Export Functionality**: Save high-quality plots
@@ -233,6 +221,7 @@ python test_enhanced_gui.py
 - **Large Datasets**: Data sampling for >1000 time steps
 - **Memory Usage**: Data chunking for massive simulations
 - **Rendering**: Optimized plot updates for smoother animation
+- **Caching**: Intelligent caching for improved performance
 
 ## 🐛 Troubleshooting
 
@@ -282,6 +271,16 @@ PYTHONPATH=. python enhanced_gui_viewer.py  # Full path resolution
 2. **Selective Loading**: Use custom data ranges for large simulations
 3. **System Performance**: Close other applications when using the viewer
 4. **Hardware**: SSD storage recommended for large datasets
+5. **Theme Selection**: Use dark theme for better performance on some systems
+
+## 📚 Referencing This Work
+
+If you use or build upon this project in an **academic** or **research** context, please **cite** the repository and the authors (yourself and *Vy Nguyen*) accordingly. For example, using an **IEEE-style reference**:
+
+```
+[1] S. Afsharghoochani and V. Nguyen, "KMCView: Kinetic Monte Carlo Visualization Tool", 
+GitHub repository, 2025. [Online]. Available: https://github.com/shahabafshar/kmcview
+```
 
 ## 🤝 Contributing
 
@@ -313,8 +312,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- **[Vy Nguyen](https://www.researchgate.net/profile/Vy-Nguyen-154)** for collaboration and contributions to this project
 - **KMC Community** for the excellent simulation software
-- **Matplotlib & Plotly Communities** for visualization frameworks
 - **Matplotlib Team** for the visualization framework
 - **Scientific Python Community** for the foundational libraries
 
@@ -323,7 +322,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Issues**: Report bugs on GitHub Issues
 - **Discussions**: Join our GitHub Discussions
 - **Email**: contact@yourproject.com
-- **Documentation**: Visit our [Wiki](https://github.com/yourusername/kmcview/wiki)
+- **Documentation**: Visit our [Wiki](https://github.com/shahabafshar/kmcview/wiki)
 
 ## 🔮 Future Enhancements
 

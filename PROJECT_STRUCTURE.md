@@ -13,7 +13,6 @@ KMCView/
 ├── 📄 LICENSE                   # MIT License
 ├── 📄 .gitignore               # Git ignore rules
 ├── 📁 input-output/            # KMC simulation data
-├── 📁 backup/                  # Archive of old versions
 ├── 📁 .git/                    # Git repository
 ├── 📁 .venv/                   # Python virtual environment
 └── 📁 .vscode/                 # VS Code settings
@@ -41,11 +40,7 @@ python enhanced_gui_viewer.py --data-dir input-output --theme dark
 - **Export functionality** for high-quality plots
 - **Real-time performance monitoring**
 
-## 📁 Backup Directory
 
-All previous versions, Colab implementations, packaging files, and analysis scripts have been moved to the `backup/` directory to keep the main project clean and focused.
-
-See `backup/README_BACKUP.md` for details on archived content.
 
 ## 🧪 Testing
 
@@ -74,4 +69,4 @@ python enhanced_gui_viewer.py --theme light
 
 ---
 
-**Focus**: This streamlined structure allows developers to focus on the core enhanced GUI viewer while preserving development history in the backup directory. 
+**Focus**: This streamlined structure allows developers to focus on the core enhanced GUI viewer for optimal performance and maintainability. 
