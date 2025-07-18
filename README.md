@@ -32,6 +32,12 @@ The viewer features:
 - ✅ **Configurable data directories**
 - ✅ **Cross-platform compatibility**
 
+## 📸 Screenshot
+
+![KMCView Application](KMCView.png)
+
+*KMCView showing molecular evolution with real-time coverage charts, interactive controls, and species visualization*
+
 ## 🚀 Features
 
 ### Core Functionality
