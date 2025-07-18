@@ -1,0 +1,42 @@
+{
+  "cell_vectors": [
+    [
+      6.13378,
+      0.0
+    ],
+    [
+      0.0,
+      6.13378
+    ]
+  ],
+  "repeat_cell": [
+    20,
+    20
+  ],
+  "site_type_names": [
+    "site_types",
+    "top1",
+    "bridge1",
+    "top2",
+    "bridge2"
+  ],
+  "site_coordinates": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.25
+    ],
+    [
+      0.0,
+      0.5
+    ],
+    [
+      0.0,
+      0.75
+    ]
+  ],
+  "site_types": []
+}
