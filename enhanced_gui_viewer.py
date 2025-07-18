@@ -647,14 +647,16 @@ class EnhancedMolecularViewer:
         # Plot individual species coverage using colors from settings
         species_list = ['H*', 'GeH2*', 'GeH3*']
         for species in species_list:
-            # Get species color from settings, with fallback
-            species_color = self.species_properties.get(species, {}).get('color', '#888888')
+            # Get species properties from settings, with fallback
+            species_props = self.species_properties.get(species, {})
+            species_color = species_props.get('color', '#888888')
+            species_shape = species_props.get('shape', 'o')
             
             # Calculate species coverage
             species_coverages = [self.calculate_species_coverage(s, species) for s in steps]
             
             # Only plot if species is visible in settings
-            if self.species_properties.get(species, {}).get('visible', True):
+            if species_props.get('visible', True):
                 # Ensure minimum line visibility by adding a small offset if all values are very small
                 max_coverage = max(species_coverages) if species_coverages else 0
                 if max_coverage < 0.1:  # If coverage is very small, add a small offset for visibility
@@ -669,11 +671,14 @@ class EnhancedMolecularViewer:
             
             # Add current points for individual species
             for species in species_list:
-                if self.species_properties.get(species, {}).get('visible', True):
-                    species_color = self.species_properties.get(species, {}).get('color', '#888888')
+                species_props = self.species_properties.get(species, {})
+                if species_props.get('visible', True):
+                    species_color = species_props.get('color', '#888888')
+                    species_shape = species_props.get('shape', 'o')
                     current_species_coverage = self.calculate_species_coverage(step, species)
                     self.coverage_ax.scatter([current_time], [current_species_coverage], 
-                                           color=species_color, s=50, zorder=5, alpha=0.9)
+                                           color=species_color, s=50, marker=species_shape, 
+                                           zorder=5, alpha=0.9)
         
         # Formatting
         self.coverage_ax.set_xlabel('Time', fontsize=8, color=self.colors['text'])
